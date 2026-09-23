@@ -1,0 +1,137 @@
+{
+  "name": "@fore-auto/skills",
+  "version": "1.0.0",
+  "description": "AUTO 品牌 Agent Skills 合集：让 AI 帮你自动建站、优化电脑、控制硬件、挖掘客户、产出内容。装一次，说一句话就能用。",
+  "keywords": [
+    "agent-skill",
+    "ai-skill",
+    "skill",
+    "workbuddy",
+    "ai-agent",
+    "automation",
+    "自动化",
+    "site-builder",
+    "website-builder",
+    "建站",
+    "seo",
+    "geo",
+    "generative-engine-optimization",
+    "ai-search",
+    "pc-cleaner",
+    "system-optimization",
+    "电脑优化",
+    "cleanup",
+    "iot",
+    "smart-home",
+    "智能家居",
+    "raspberry-pi",
+    "arduino",
+    "esp32",
+    "find-customers",
+    "lead-generation",
+    "b2b",
+    "客户挖掘",
+    "找客户",
+    "prompt",
+    "prompt-engineering",
+    "提示词"
+  ],
+  "author": "fore.vip",
+  "license": "MIT",
+  "homepage": "https://auto.fore.vip",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fore-auto/skills.git"
+  },
+  "bugs": {
+    "url": "https://github.com/fore-auto/skills/issues",
+    "email": "hi@fore.vip"
+  },
+  "files": [
+    "auto/",
+    "auto-find-customers/",
+    "auto-geo/",
+    "auto-iot/",
+    "auto-pc-clear/",
+    "auto-prompt/",
+    "auto-site-builder/",
+    "bin/",
+    "README.md",
+    "LICENSE"
+  ],
+  "bin": {
+    "skills": "bin/cli.js",
+    "fore-auto-skills": "bin/cli.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "list": "node bin/cli.js list",
+    "check": "node scripts/prepublish.mjs",
+    "prepublishOnly": "node scripts/prepublish.mjs",
+    "release": "bash scripts/publish.sh"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "skills": [
+    {
+      "name": "auto",
+      "displayName": "AUTO",
+      "description": "总入口。输入一个主题，返回该主题最优质的执行步骤，拿到可直接照做的行动清单。",
+      "path": "auto/",
+      "category": "productivity",
+      "version": "1.4.2"
+    },
+    {
+      "name": "auto-site-builder",
+      "displayName": "官网自动建站",
+      "description": "从托管选型、风格脚手架到部署上线与搜索引擎收录，一步步搭起自己的官网；已有站点可先做体检再决定优化还是重建。",
+      "path": "auto-site-builder/",
+      "category": "web",
+      "version": "1.0.0"
+    },
+    {
+      "name": "auto-geo",
+      "displayName": "GEO",
+      "description": "让 AI 搜索在回答里引用你的内容：从引用来源摸底、发布阵地优选到逐平台产出可摘录内容，同时支持 B 端客户挖掘。",
+      "path": "auto-geo/",
+      "category": "marketing",
+      "version": "1.2.0"
+    },
+    {
+      "name": "auto-iot",
+      "displayName": "智控",
+      "description": "在自有电脑上统一控制智能家居（灯 / 插座 / 空调 / 窗帘 / 传感器）、创客硬件（树莓派 / Arduino / ESP32）与本机外设，不绑定任何协议。",
+      "path": "auto-iot/",
+      "category": "iot-control",
+      "version": "1.0.3"
+    },
+    {
+      "name": "auto-pc-clear",
+      "displayName": "电脑优化",
+      "description": "电脑体检与清理优化：清缓存、腾硬盘、优化启动项与后台进程，按风险分级执行，敏感操作先征询。支持 macOS / Windows / Linux。",
+      "path": "auto-pc-clear/",
+      "category": "system-tools",
+      "version": "1.1.2"
+    },
+    {
+      "name": "auto-prompt",
+      "displayName": "AUTO.Prompt",
+      "description": "策略先行的解题协议：先出策略卡再动手，逐级复用已有资产，用最短路径把主题、问题、方案类任务做对。",
+      "path": "auto-prompt/",
+      "category": "productivity",
+      "version": "1.0.0"
+    },
+    {
+      "name": "auto-find-customers",
+      "displayName": "找客户",
+      "description": "输入你的产品或服务，分析产业链下游，采集可联系的目标客户线索并整理成清单，支持邮件直推。只用公开信息。",
+      "path": "auto-find-customers/",
+      "category": "sales",
+      "version": "2.2.1"
+    }
+  ]
+}

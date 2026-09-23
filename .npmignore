@@ -1,0 +1,39 @@
+# 发布白名单由 package.json 的 files 字段控制，本文件做二次兜底：
+# 即使白名单被误改，以下内容也不会进入 npm 包。
+
+# 工程与本地数据
+.git/
+.github/
+.gitignore
+.gitattributes
+.editorconfig
+.workbuddy/
+.codebuddy/
+.claude/
+AGENTS.md
+AGENT.md
+MEMORY.md
+
+# 开发脚本（bin/ 是 npx 入口，需随包发布，见 package.json files）
+scripts/
+
+# 系统与 IDE
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*~
+
+# 发布产物与依赖
+*.zip
+*.tgz
+*.log
+node_modules/
+
+# 凭据
+.env
+.env.*
+*.pem
+*.key
+providers.json
+.ossutilconfig
