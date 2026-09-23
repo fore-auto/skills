@@ -11,6 +11,8 @@
 
 官网：<https://auto.fore.vip>
 
+[简体中文](./README.md) | [English](./README.en.md)
+
 ---
 
 ## 快速开始

@@ -1,0 +1,18 @@
+#!/usr/bin/env sh
+# 提交前闸门：中英文 README 结构必须一致
+#
+# 由 scripts/install-hooks.sh 安装到 .git/hooks/pre-commit。
+# 只校验中英文 README 结构，不拦其它内容；确需跳过用 git commit --no-verify。
+
+if ! command -v node >/dev/null 2>&1; then
+  echo "pre-commit: 未找到 node，跳过中英文 README 同步校验"
+  exit 0
+fi
+
+if ! node scripts/check-readme-sync.mjs; then
+  echo ""
+  echo "  提交已拦下：中英文 README 未同步。"
+  echo "  改了 README.md 就同步 README.en.md（或反之），再提交。"
+  echo ""
+  exit 1
+fi

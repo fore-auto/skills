@@ -57,6 +57,7 @@
     "auto-site-builder/",
     "bin/",
     "README.md",
+    "README.en.md",
     "LICENSE"
   ],
   "bin": {
@@ -69,7 +70,9 @@
   "scripts": {
     "list": "node bin/cli.js list",
     "check": "node scripts/prepublish.mjs",
+    "docs:check": "node scripts/check-readme-sync.mjs",
     "prepublishOnly": "node scripts/prepublish.mjs",
+    "prepare": "bash scripts/install-hooks.sh",
     "release": "bash scripts/publish.sh"
   },
   "publishConfig": {

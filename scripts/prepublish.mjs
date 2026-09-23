@@ -2,16 +2,19 @@
 /**
  * 发布前校验 —— npm run check / prepublishOnly 自动调用
  *
- * 校验四类问题，任一不通过即中止发布：
+ * 校验五类问题，任一不通过即中止发布：
  *   1. 包元数据完整性与版本号格式
  *   2. 技能清单与实际目录一致，SKILL.md 必备字段齐全
  *   3. 敏感信息扫描（密钥 / 私钥 / 凭据赋值）
  *   4. 发布白名单安全性（防止把工程文件带进包）
+ *   5. 中英文 README 结构同步（见 check-readme-sync.mjs）
  */
 
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+
+import { checkReadmeSync } from './check-readme-sync.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const errors = [];
@@ -156,6 +159,11 @@ let hitCount = 0;
 })(ROOT);
 
 if (!hitCount) OK('敏感信息扫描：未发现密钥 / 私钥 / 凭据明文');
+
+// ---------- 5. 中英文 README 同步 ----------
+const readmeSync = checkReadmeSync();
+for (const note of readmeSync.notes) OK(note);
+for (const issue of readmeSync.issues) FAIL(issue);
 
 // ---------- 报告 ----------
 function report() {
