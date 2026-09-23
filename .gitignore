@@ -40,6 +40,3 @@ MEMORY.md
 *.pem
 *.key
 credentials.json
-config/providers.json
-providers.json
-.ossutilconfig
