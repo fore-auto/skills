@@ -99,10 +99,10 @@
     {
       "name": "auto-geo",
       "displayName": "GEO",
-      "description": "让 AI 搜索在回答里引用你的内容：从引用来源摸底、发布阵地优选到逐平台产出可摘录内容，同时支持 B 端客户挖掘。",
+      "description": "让 AI 搜索在回答里引用你的内容：引用来源摸底 → 发布阵地优选 → 逐平台产出可摘录内容，并附 GEO 状态诊断图。只做 GEO；找客户请用「找客户」技能。",
       "path": "auto-geo/",
       "category": "marketing",
-      "version": "1.2.0"
+      "version": "1.0.5"
     },
     {
       "name": "auto-iot",
@@ -134,7 +134,7 @@
       "description": "输入你的产品或服务，分析产业链下游，采集可联系的目标客户线索并整理成清单，支持邮件直推。只用公开信息。",
       "path": "auto-find-customers/",
       "category": "sales",
-      "version": "2.2.1"
+      "version": "1.0.2"
     }
   ]
 }

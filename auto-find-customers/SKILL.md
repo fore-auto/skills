@@ -8,7 +8,7 @@ description: 找客户 · B2B 客户挖掘与获客助手（前凌智选 / fore.
 description_zh: B2B 客户挖掘与获客助手。把「帮我找客户 / 我的货卖给谁 / 客户挖掘 / 获客 / 潜在客户 / 下游客户推荐 / 销售线索」转化为可联系、可暂存的客户线索：前置确认（不查库）→ 需求采集 → 产业链下游分析 → 多源客户采集（逐条标注来源与时间）→ 客户清单暂存（主通道写入 mcp.fore.vip/crm 服务端线索库临时保存，不可达才降级本地 CSV）→ 邮件直推与发布获客补偿。只用公开信息、不采隐私数据、发布内容不做硬广导流。
 description_en: "B2B lead generation and customer discovery assistant. Turns find-me-customers / who-buys-my-product / lead-gen / prospecting / downstream recommendations / sales leads into contactable, temporarily storable leads. Collection-first flow: F0 intake (get the open_key, do NOT query the store first), requirement intake, downstream industry analysis, multi-source prospecting with source and timestamp on every entry, lead sheet persisted to the mcp.fore.vip/crm server-side store as short-term holding (local CSV only as an offline fallback), server-side dedupe by company name, then email outreach plus compensated inbound acquisition. Uses only public information, never private data, and avoids hard-sell redirect content."
 category: sales
-version: 2.2.1
+version: 1.0.2
 author: fore.vip
 agent_created: true
 triggers:

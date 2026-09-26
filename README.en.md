@@ -38,7 +38,7 @@ Once installed, simply state what you need in your AI assistant — for example 
 |-------|------|--------------|
 | `auto` | AUTO | The main entry. Give it a topic and get the steps most worth following. Some content requires unlocking. |
 | `auto-site-builder` | Website Builder | Walks you from hosting and style choices through to deployment and search engine indexing. Already have a site? Start with a health check, then decide whether to optimise or rebuild. |
-| `auto-geo` | GEO | Gets AI search engines to cite your content. Also finds B2B customers. |
+| `auto-geo` | GEO | Gets AI search engines to cite your content: source recon → outlet picking → per-platform quotable drafts, plus a GEO status map. |
 | `auto-iot` | IoT Control | Controls smart home and maker hardware from your own computer: lights, plugs, air conditioning, curtains, Raspberry Pi, ESP32 and more. |
 | `auto-pc-clear` | PC Optimiser | System health check, cache cleanup, disk space, startup items. Anything sensitive is confirmed with you first. Supports macOS / Windows / Linux. |
 | `auto-prompt` | AUTO.Prompt | Makes AI think before it acts: strategy first, then execution, fewer wrong turns. |

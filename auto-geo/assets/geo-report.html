@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GEO 状态诊断图 · AUTO-GEO</title>
+<style>
+  :root{
+    --bg:#070a0e; --bg2:#0a0f15; --panel:#0d131a; --panel2:#121b25;
+    --bd:#1c2733; --bd2:#2a3b4e;
+    --tx:#e6eef7; --tx1:#c2d0dd; --tx2:#7d8fa3; --tx3:#4d5c6d;
+    --cy:#5ee0ff; --cys:rgba(94,224,255,.08); --cyb:rgba(94,224,255,.38);
+    --r:#ff4d6d;  --rs:rgba(255,77,109,.10);  --rb:rgba(255,77,109,.45);
+    --g:#00e08a;  --gs:rgba(0,224,138,.09);   --gb:rgba(0,224,138,.42);
+    --a:#ffb020;  --as:rgba(255,176,32,.09);  --ab:rgba(255,176,32,.42);
+    --s:#6f8bb0;  --ss:rgba(111,139,176,.10); --sb:rgba(111,139,176,.42);
+    --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"JetBrains Mono","PingFang SC","Hiragino Sans GB",monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0}
+  body{font-family:var(--mono);background:var(--bg);color:var(--tx1);font-size:13px;-webkit-font-smoothing:antialiased}
+  .app{display:flex;flex-direction:column;height:100vh}
+
+  .bar{display:flex;align-items:center;gap:18px;padding:10px 20px;background:var(--bg2);
+    border-bottom:1px solid var(--bd);flex-wrap:wrap}
+  .head{display:flex;align-items:baseline;gap:9px;min-width:300px}
+  .head .ps{color:var(--g);font-weight:500}
+  .head h1{margin:0;font-size:13.5px;font-weight:500;color:var(--tx);letter-spacing:.02em}
+  .head .meta{font-size:11.5px;color:var(--tx3)}
+  .legend{display:flex;gap:7px;margin-left:auto;flex-wrap:wrap}
+  .lg{display:inline-flex;align-items:center;gap:6px;padding:4px 9px;border:1px solid var(--bd);background:var(--panel);
+    font-size:11.5px;color:var(--tx2);cursor:pointer;user-select:none;transition:border-color .18s,background .18s,color .18s}
+  .lg:hover{border-color:var(--bd2);color:var(--tx1)}
+  .lg[data-on="1"]{background:var(--panel2);border-color:var(--bd2);color:var(--tx)}
+  .lg i{width:6px;height:6px;display:block;box-shadow:0 0 6px currentColor}
+  .lg .n{color:var(--tx3);font-variant-numeric:tabular-nums}
+  .tools{display:flex;gap:6px}
+  .tools button{font-family:var(--mono);font-size:11.5px;color:var(--tx2);background:var(--panel);
+    border:1px solid var(--bd);padding:5px 11px;cursor:pointer;transition:border-color .18s,color .18s,background .18s}
+  .tools button:hover{border-color:var(--bd2);color:var(--tx);background:var(--panel2)}
+
+  /* 服务 CTA：实心高饱和，与四档判定色（描边 + 半透明底）形态区分，不参与语义色体系 */
+  .cta{display:inline-flex;align-items:center;gap:9px;padding:7px 14px;text-decoration:none;
+    background:linear-gradient(135deg,#e53e3e,#ff2d55);border:1px solid #ff4d6d;border-radius:2px;
+    box-shadow:0 0 0 1px rgba(255,77,109,.22),0 0 20px rgba(229,62,62,.32);
+    transition:transform .18s,box-shadow .18s,filter .18s;white-space:nowrap}
+  .cta:hover{transform:translateY(-1px);filter:brightness(1.12);
+    box-shadow:0 0 0 1px rgba(255,77,109,.42),0 0 30px rgba(229,62,62,.58)}
+  .cta .dot{width:6px;height:6px;background:#fff;box-shadow:0 0 8px #fff;flex:0 0 6px;
+    animation:pulseled 1.7s ease-in-out infinite}
+  .cta .t{font-size:13px;font-weight:600;color:#fff;letter-spacing:.06em}
+  .cta .p{font-size:11px;color:#ffe1e7;letter-spacing:.03em;font-variant-numeric:tabular-nums;
+    padding-left:9px;border-left:1px solid rgba(255,255,255,.34)}
+  .cta .ar{font-size:12px;color:#fff;opacity:.85}
+  @keyframes pulseled{0%,100%{opacity:1}50%{opacity:.22}}
+  @media (prefers-reduced-motion:reduce){.cta .dot{animation:none}}
+
+  .note{padding:7px 20px;background:#080d13;border-bottom:1px solid var(--bd);
+    font-size:11px;color:var(--tx3);line-height:1.55;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .note b{color:var(--a);font-weight:500}
+
+  .stage{flex:1;position:relative;overflow:hidden;cursor:grab;background-color:var(--bg);
+    background-image:linear-gradient(rgba(0,224,138,.045) 1px,transparent 1px),
+                     linear-gradient(90deg,rgba(0,224,138,.045) 1px,transparent 1px);
+    background-size:30px 30px}
+  .stage.drag{cursor:grabbing}
+  .stage::after{content:"";position:absolute;inset:0;pointer-events:none;
+    background:repeating-linear-gradient(180deg,rgba(255,255,255,.016) 0 1px,transparent 1px 3px)}
+  .canvas{position:absolute;top:0;left:0;transform-origin:0 0}
+  .canvas.smooth{transition:transform .32s cubic-bezier(.4,0,.2,1)}
+
+  svg.links{position:absolute;top:0;left:0;overflow:visible}
+  .link{stroke:#2b3b4d;stroke-width:1.3;fill:none;stroke-linecap:round;
+    stroke-dasharray:1;stroke-dashoffset:1;animation:draw .7s cubic-bezier(.4,0,.2,1) forwards;
+    transition:stroke .2s,opacity .28s,filter .2s}
+  @keyframes draw{to{stroke-dashoffset:0}}
+  .link.hidden{opacity:0}
+  .link.dim{opacity:.1}
+  .link.muted{opacity:.12}
+  .link.hi{stroke-width:2.1}
+
+  .card{position:absolute;top:0;left:0;background:var(--panel);border:1px solid var(--bd);
+    transition:transform .3s cubic-bezier(.4,0,.2,1),opacity .25s,background .2s,border-color .2s,box-shadow .2s}
+  .card.enter{opacity:0}
+  .card.hidden{opacity:0;visibility:hidden;pointer-events:none}
+  .card.dim{opacity:.2}
+  .card.muted{opacity:.13}
+
+  /* 根卡片：中性冰蓝，不占语义色 */
+  .root{display:flex;flex-direction:column;justify-content:center;padding:14px 16px;cursor:pointer;
+    border-color:var(--cyb);background:linear-gradient(180deg,#07161c,#0a0c11);
+    box-shadow:0 0 0 1px rgba(94,224,255,.09),0 0 32px rgba(94,224,255,.13)}
+  .root:hover{box-shadow:0 0 0 1px rgba(94,224,255,.2),0 0 44px rgba(94,224,255,.22)}
+  .root .kick{font-size:10.5px;color:var(--cy);letter-spacing:.08em;margin-bottom:7px}
+  .root .title{font-size:16.5px;font-weight:500;color:#dff6ff;line-height:1.25;letter-spacing:.01em}
+  .root .sub{font-size:10.5px;color:var(--tx3);margin-top:8px;line-height:1.4}
+  .root .stat{font-size:10.5px;color:var(--tx2);margin-top:6px;font-variant-numeric:tabular-nums}
+  .cur{display:inline-block;width:8px;height:14px;background:var(--cy);margin-left:7px;vertical-align:-2px;
+    animation:blink 1.1s steps(1) infinite}
+  @keyframes blink{0%,49%{opacity:1}50%,100%{opacity:0}}
+  @media (prefers-reduced-motion:reduce){.cur{animation:none}}
+
+  /* 一级：AI 引擎（结果覆盖端） */
+  .eng{display:flex;flex-direction:column;justify-content:center;gap:3px;padding:7px 26px 7px 12px;cursor:pointer}
+  .eng:hover{background:var(--panel2);border-color:var(--bd2)}
+  .eng .top{display:flex;align-items:baseline;gap:8px}
+  .eng .nm{font-size:13.5px;color:var(--tx);white-space:nowrap;flex:0 0 auto}
+  .pfx{color:var(--c,var(--tx3));font-size:11.5px;font-weight:500}
+  .vt{font-size:10.5px;color:var(--c,var(--tx3));letter-spacing:.03em;white-space:nowrap;margin-left:auto}
+  .eng .mid{font-size:10px;color:var(--tx3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .eng .bot{display:flex;align-items:center;gap:7px;min-width:0}
+  .bs{font-size:10px;padding:1px 5px;border:1px solid var(--bd2);color:var(--tx3);white-space:nowrap;flex:0 0 auto}
+  .bs.b-real{color:var(--g);border-color:var(--gb)}
+  .bs.b-infer{color:var(--a);border-color:var(--ab)}
+  .kt{font-size:10px;padding:1px 5px;border:1px dashed var(--cyb);color:var(--cy);white-space:nowrap;flex:0 0 auto}
+  .eng .ev{font-size:10.5px;color:var(--tx2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1 1 auto;min-width:0}
+  .tm{position:absolute;right:9px;top:50%;margin-top:-7px;width:14px;height:14px;
+    border:1px solid var(--bd2);color:var(--tx3);font-size:10px;
+    line-height:12px;text-align:center;background:var(--bg2)}
+  .eng:hover .tm{color:var(--tx1);border-color:var(--bd2)}
+
+  /* 二级：优化意见 */
+  .adv{display:flex;align-items:center;gap:9px;padding:7px 12px;font-size:12.5px;line-height:1.42;
+    border-left:3px solid var(--bd)}
+  .adv .atx{flex:1 1 auto;min-width:0}
+  .adv .chip{flex:0 0 auto;font-size:10.5px;padding:3px 6px;border:1px solid var(--bd2);color:var(--tx3);
+    letter-spacing:.03em;white-space:nowrap}
+  .adv.v-ok{border-color:var(--gb);border-left-color:var(--g);background:var(--gs);color:#c6f7e2}
+  .adv.v-ok .chip{color:var(--g);border-color:var(--gb);background:rgba(0,224,138,.08)}
+  .adv.v-part{border-color:var(--ab);border-left-color:var(--a);background:var(--as);color:#ffe4b3}
+  .adv.v-part .chip{color:var(--a);border-color:var(--ab);background:rgba(255,176,32,.08)}
+  .adv.v-gap{border-color:var(--rb);border-left-color:var(--r);background:var(--rs);color:#ffd6dc}
+  .adv.v-gap .chip{color:var(--r);border-color:var(--rb);background:rgba(255,77,109,.08)}
+  .adv.v-todo{border-color:var(--sb);border-left-color:var(--s);background:var(--ss);color:#d3ddec}
+  .adv.v-todo .chip{color:var(--s);border-color:var(--sb);background:rgba(111,139,176,.08)}
+
+  .hint{position:absolute;left:20px;bottom:13px;font-size:11px;color:var(--tx3);pointer-events:none;letter-spacing:.02em}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="bar">
+    <div class="head">
+      <span class="ps">$</span>
+      <h1 id="cmd">AUTO-GEO --diagnose</h1>
+      <span class="meta" id="meta"></span>
+    </div>
+    <div class="legend" id="legend"></div>
+    <div class="tools">
+      <button data-act="out">−</button>
+      <button data-act="all-view">全览</button>
+      <button data-act="fit">适应宽度</button>
+      <button data-act="in">+</button>
+      <button data-act="all" id="btnAll">全部折叠</button>
+    </div>
+    <a class="cta" id="cta" href="https://fore.vip/web/vip?plan=vip&amp;idx=1" target="_blank" rel="noopener">
+      <span class="dot"></span>
+      <span class="t" id="ctaT">专业全托管</span>
+      <span class="p" id="ctaP">¥12000 专业版</span>
+      <span class="ar">→</span>
+    </a>
+  </header>
+  <div class="note" id="note"></div>
+  <main class="stage" id="stage">
+    <div class="canvas" id="canvas"></div>
+    <div class="hint">悬停只看一路 · 点根卡片折叠整组 · 点图例按判定筛选 · ⌘/Ctrl + 滚轮缩放 · 空白拖拽平移</div>
+  </main>
+</div>
+
+<script>
+/* ============================================================================
+   GEO 状态诊断图 · 单页模板（auto-geo / fore.vip）
+   ---------------------------------------------------------------------------
+   只需改顶层 REPORT 对象；下方渲染引擎无需改动。
+
+   三层：根（固定 3 态）→ 一级 nodes（该态的端点，随产品变）→ 二级 a（优化意见）
+   三根的一级端点类型不同，别三根套同一组节点：
+     官网状态    → 一级 = 搜索引擎（百度/Bing/搜狗/字节/360/夸克/Google）
+     AI 引擎状态 → 一级 = AI 引擎（豆包/元宝/Kimi/DeepSeek/文心/千问/秘塔…）
+     社媒状态    → 一级 = 社媒平台（公众号/头条号/百家号/小红书/知乎/抖音…）
+   池是起点不是穷举；未测得的端点照样出节点，判定 todo。
+
+   REPORT = {
+     brand : '品牌名',
+     site  : '主域名',
+     date  : 'YYYY-MM-DD',
+     cmd   : '命令回显（顶栏，品牌名大写）',
+     cta   : {                       // 可选：右上角服务按钮。省略或 u 为空则自动隐藏
+       t : '专业全托管',              // 按钮主文案
+       p : '¥12000 专业版',           // 价格副标
+       u : 'https://fore.vip/web/vip?plan=vip&idx=1' // 跳转地址（?plan= 定区块、&idx= 定档位，0 基）
+     },
+     notice: '口径声明（黄色提示条）',
+     roots : [{
+       kick : '// ROOT-01',
+       title: '官网状态',              // 官网状态 | AI 引擎状态 | 社媒状态
+       sub  : '端点池裁剪情况与资产摘要，一行',
+       nodes: [{
+         n : '百度',                  // 一级节点名 = 端点名
+         e : '搜索引擎 · 文心底座',     // 端点类型 / 来源池备注
+         v : 'todo',                  // ok | part | gap | todo
+         b : '待验证',                 // 实测 | 推断 | 待验证
+         ev: 'site: 查询被反爬拦截',    // 一行证据（实测值 / 推断依据 / 未测得原因）
+         k : '池外新增',               // 可选：仅池外追加节点填，渲染成标签
+         a : ['二级：优化意见 1', '…']  // 1–2 条，自动排布
+       }]
+     }]
+   }
+   ============================================================================ */
+
+const REPORT={
+  brand:'前凌智选',
+  site:'auto.fore.vip',
+  date:'2026-09-26',
+  cmd:'AUTO-GEO --diagnose 前凌智选',
+  cta:{t:'专业全托管', p:'¥12000 专业版', u:'https://fore.vip/web/vip?plan=vip&idx=1'},
+  notice:'三镜头摸底：<b>镜头 A 搜索引擎收录已实测</b>（Bing/搜狗/360/字节/夸克 5 项测通，百度与 Google 被反爬或不可达）；镜头 C 除官网页脚挂码与平台页 200 外，平台站内需登录态、<b>未测得</b>；镜头 B 按父系检索底座给判定，引擎实际引用<b>一律留待验证</b>。标 todo 的端点都给了实测动作，测完再投入。',
+  roots:[
+    {
+      kick:'// ROOT-01',
+      title:'官网状态',
+      sub:'一级 = 搜索引擎 · 池内 8 项全出节点 · Bing 实测已收录',
+      nodes:[
+        {n:'Bing',e:'搜索引擎 · Perplexity/Copilot 底座',v:'ok',b:'实测',ev:'site: 约 59 个结果',
+         a:['已收录且量级可观：保持 sitemap 更新频率即可，不再为它单独加投入']},
+        {n:'字节（头条搜索）',e:'搜索引擎 · 豆包底座',v:'part',b:'实测',ev:'结果页命中本站域名 8 处',
+         a:['豆包底座已通：场景页从 8 条扩到 20+ 并同步 sitemap，让底座有更多可抓页面']},
+        {n:'360',e:'搜索引擎',v:'part',b:'实测',ev:'结果页命中域名 19 处，无计数',
+         a:['收录存在但量级未知：确认首页在列即可，不必为它单独优化']},
+        {n:'夸克',e:'搜索引擎 · 通义千问底座',v:'part',b:'实测',ev:'quark.sm.cn 命中域名 4 处',
+         a:['命中数偏低：把「AUTO 是什么」写成可摘录定义段，抬高单页被引概率']},
+        {n:'搜狗',e:'搜索引擎 · 腾讯元宝底座',v:'part',b:'实测',ev:'结果页命中域名 38 处；计数 17,247 属泛化值不可信',
+         a:['去搜狗站长平台核对真实收录数——泛化计数会虚高，别据此判断已铺满']},
+        {n:'百度',e:'搜索引擎 · 文心一言底座',v:'todo',b:'待验证',ev:'site: 查询返 1.5KB 反爬页，未测得',
+         a:['去百度搜索资源平台验证站点并提交 sitemap（当前仅 8 条 URL）——百度底座不通，文心一言必然不引用']},
+        {n:'Google',e:'搜索引擎 · 海外',v:'todo',b:'待验证',ev:'连接失败，沙箱网络不可达',
+         a:['无海外计划则跳过；有则先挂 Google Search Console 看真实收录，再谈优化']},
+        {n:'其它（微信搜一搜 / 站内搜索）',e:'搜索引擎 · 补充',v:'todo',b:'待验证',ev:'未测得',
+         a:['微信搜一搜对腾讯元宝权重高：用品牌词自查一次，成本 2 分钟']}
+      ]
+    },
+    {
+      kick:'// ROOT-02',
+      title:'AI 引擎状态',
+      sub:'一级 = AI 引擎 · 池内 11 项全出节点 · 5 项有底座实测 / 6 项未测得',
+      nodes:[
+        {n:'豆包',e:'底座 = 字节 / 头条搜索',v:'part',b:'待验证',ev:'底座已收录（命中 8 处）；引擎实际引用未验证',
+         a:['用 3 条问句实测提及率：「AUTO 是什么」「agent 全自动化 工具」「fore.vip 靠谱吗」，记引用来源域名']},
+        {n:'腾讯元宝',e:'底座 = 搜狗 + 微信',v:'part',b:'待验证',ev:'搜狗已收录 + 公众号账号存在',
+         a:['把能力介绍同步发公众号——元宝吃微信内源，这是所有引擎里最短的一条路']},
+        {n:'DeepSeek',e:'无自有索引 · 走通用检索',v:'part',b:'待验证',ev:'Bing 已收录约 59 条',
+         a:['底座通、瓶颈在内容形态：把 34 个能力整理成结构化清单页，方便检索层整段摘录']},
+        {n:'通义千问',e:'底座 = 夸克',v:'part',b:'待验证',ev:'夸克命中域名 4 处，量级偏低',
+         a:['补可摘录定义段与 FAQ，先把单页可引性做起来，别急着铺量']},
+        {n:'Perplexity',e:'英文源优先 · 自有索引',v:'gap',b:'推断',ev:'全站中文单语、无 hreflang、无英文页',
+         a:['中文内容命中率结构性偏低：无英文内容计划时直接跳过，别为它做内容']},
+        {n:'文心一言',e:'底座 = 百度',v:'todo',b:'待验证',ev:'百度 site: 未测得',
+         a:['先解决百度收录（资源平台验证 + 提交 sitemap），底座不通再谈引擎引用']},
+        {n:'Kimi',e:'检索来源未公开',v:'todo',b:'待验证',ev:'未测得（无可用底座代理）',
+         a:['写一篇 3000 字「AUTO 是什么」发知乎，再实测 Kimi 是否引用']},
+        {n:'秘塔',e:'学术 · 垂直库优先',v:'todo',b:'待验证',ev:'未测得',
+         a:['2 条问句实测：命中率低于 1/3 直接放弃，不为其铺内容']},
+        {n:'小米（超级小爱）',e:'手机端语音入口',v:'todo',b:'待验证',ev:'未测得',
+         a:['先确认是否有可复现的网页 / App 检索入口；不可复现就列入观察，不投入']},
+        {n:'MiniMax',e:'入口未公开',v:'todo',b:'待验证',ev:'未测得',
+         a:['同小米：入口可复现再测，本次不投入']},
+        {n:'其它（阶跃 / 智谱等新兴引擎）',e:'聚合节点',v:'todo',b:'待验证',ev:'未测得',
+         a:['季度复检扫一遍新引擎，只跟受众重合度高的']}
+      ]
+    },
+    {
+      kick:'// ROOT-03',
+      title:'社媒状态',
+      sub:'一级 = 社媒平台 · 全池 9 项按受众裁剪至 6 项 · 池外新增 2 项',
+      nodes:[
+        {n:'公众号',e:'社媒平台 · 微信生态',v:'todo',b:'实测',ev:'官网页脚已挂公众号二维码，账号存在；内容更新与收录未验证',
+         a:['把技能上新做成系列文——元宝与微信搜一搜才有持续更新的官方源']},
+        {n:'头条号',e:'社媒平台 · 豆包源',v:'todo',b:'待验证',ev:'未测得官方账号',
+         a:['豆包底座直接吃头条内容，性价比最高的一步：先发 3 条能力图文测水']},
+        {n:'百家号',e:'社媒平台 · 百度源',v:'todo',b:'待验证',ev:'未测得官方账号',
+         a:['百度系引擎（文心一言）的引用主力，与百度收录互相加分，与上文百度一起做']},
+        {n:'知乎',e:'社媒平台 · 长文源',v:'todo',b:'待验证',ev:'未测得官方账号',
+         a:['知乎是 Kimi / 豆包的高频引用源：先发 1 篇长文占位再评估']},
+        {n:'小红书',e:'社媒平台 · 轻创业人群',v:'todo',b:'待验证',ev:'未测得官方账号',
+         a:['用「AI 替我干活」场景笔记切入，契合轻创业受众的搜索习惯']},
+        {n:'抖音',e:'社媒平台 · 与头条同源',v:'todo',b:'待验证',ev:'未测得官方账号',
+         a:['与头条号同源分发：先发短图文，跑通内容形态再考虑视频']},
+        {n:'技能 / 开发者平台',e:'池外新增 · 当前最大资产',v:'ok',b:'实测',ev:'SkillHub 用户页 32 技能 / 1.2 万下载；腾讯云镜像 26 / 6.3 千；GitHub fore-vip/skills',k:'池外新增',
+         a:['这是当前唯一成规模的社媒资产：在 GitHub README 补可摘录能力清单，把第三方口径收归官方']},
+        {n:'ima 知识库「前凌智创」',e:'池外新增 · 结构化底稿',v:'ok',b:'实测',ev:'30 个栏目，覆盖 AI / 电商 / 外贸 / 每日热点',k:'池外新增',
+         a:['已在做结构化底稿：转投知乎 / 百家号可直接复用，别另起炉灶重写']}
+      ]
+    }
+  ]
+};
+
+
+/* ------------------------- 语义字典（判定 / 依据 / 优先级） ------------------ */
+const V={
+  ok:  {t:'已覆盖',   cls:'v-ok',  c:'#00e08a', pri:'P2 保持'},
+  part:{t:'部分覆盖', cls:'v-part',c:'#ffb020', pri:'P1 加强'},
+  gap: {t:'未覆盖',   cls:'v-gap', c:'#ff4d6d', pri:'P0 优先补'},
+  todo:{t:'待验证',   cls:'v-todo',c:'#6f8bb0', pri:'P3 先实测'}
+};
+const BCLS={'实测':'b-real','推断':'b-infer','待验证':'b-todo'};
+
+/* ------------------------------- 版面常量 -------------------------------- */
+const GEO={TOP:58,GROUP_GAP:36,ROW_PITCH:74,LEAF_H:52,
+  ROOT_X:36,ROOT_W:236,ROOT_H:104,
+  ENG_X:356,ENG_W:348,ENG_H:70,
+  ADV_X:768,ADV_W:548};
+const CANVAS_W=GEO.ADV_X+GEO.ADV_W+36;
+
+/* ------------------------------- 布局预计算 ------------------------------ */
+let cursor=GEO.TOP;
+REPORT.roots.forEach(function(root){
+  root.nodes.forEach(function(en){en._rows=Math.max(1,(en.a||[]).length);});
+  const rows=root.nodes.reduce(function(s,e){return s+e._rows;},0);
+  const blockH=rows*GEO.ROW_PITCH-(GEO.ROW_PITCH-GEO.LEAF_H);
+  root._top=cursor; root._cy=cursor+blockH/2;
+  let y=cursor;
+  root.nodes.forEach(function(en){
+    en._tops=[];
+    for(let i=0;i<en._rows;i++){en._tops.push(y);y+=GEO.ROW_PITCH;}
+    en._cy=(en._tops[0]+en._tops[en._rows-1])/2+GEO.LEAF_H/2;
+  });
+  cursor+=blockH+GEO.GROUP_GAP;
+});
+const CANVAS_H=cursor-GEO.GROUP_GAP+40;
+
+/* -------------------------------- DOM 基础 ------------------------------- */
+const stage=document.getElementById('stage');
+const canvas=document.getElementById('canvas');
+const SVGNS='http://www.w3.org/2000/svg';
+canvas.style.width=CANVAS_W+'px';
+canvas.style.height=CANVAS_H+'px';
+
+const svg=document.createElementNS(SVGNS,'svg');
+svg.setAttribute('class','links');
+svg.setAttribute('width',CANVAS_W);
+svg.setAttribute('height',CANVAS_H);
+svg.setAttribute('viewBox','0 0 '+CANVAS_W+' '+CANVAS_H);
+canvas.appendChild(svg);
+
+function el(tag,cls,html){const d=document.createElement(tag);if(cls)d.className=cls;if(html!=null)d.innerHTML=html;return d;}
+function path(d,delay){
+  const p=document.createElementNS(SVGNS,'path');
+  p.setAttribute('class','link');p.setAttribute('d',d);
+  p.setAttribute('pathLength','1');p.style.animationDelay=delay+'ms';
+  svg.appendChild(p);return p;}
+function curve(x1,y1,x2,y2){
+  const dx=Math.max(28,(x2-x1)*0.42);
+  return 'M '+x1+' '+y1+' C '+(x1+dx)+' '+y1+', '+(x2-dx)+' '+y2+', '+x2+' '+y2;
+}
+
+/* --------------------------------- 渲染 --------------------------------- */
+const roots=[],engs=[];
+let dIdx=0;
+const CMD=REPORT.cmd||'AUTO-GEO --diagnose';
+const TOTAL_ENG=REPORT.roots.reduce(function(s,r){return s+r.nodes.length;},0);
+const TOTAL_ADV=REPORT.roots.reduce(function(s,r){
+  return s+r.nodes.reduce(function(t,e){return t+Math.max(1,(e.a||[]).length);},0);},0);
+document.getElementById('cmd').textContent=CMD;
+document.getElementById('meta').textContent=
+  '// '+REPORT.brand+' · '+REPORT.site+' · '+REPORT.date+' · '+TOTAL_ENG+' 端点 / '+TOTAL_ADV+' 意见';
+document.getElementById('note').innerHTML='<b>NOTE//</b> '+REPORT.notice;
+
+/* 服务 CTA：REPORT.cta 缺失或 u 为空则隐藏，模板复制到别的项目不会留下死链 */
+(function(){
+  const c=REPORT.cta||{},box=document.getElementById('cta');
+  if(!box)return;
+  if(!c.u){box.style.display='none';return;}
+  box.setAttribute('href',c.u);
+  document.getElementById('ctaT').textContent=c.t||'专业全托管';
+  document.getElementById('ctaP').textContent=c.p||'';
+})();
+
+REPORT.roots.forEach(function(root,ri){
+  const gapCount=root.nodes.filter(function(e){return e.v==='gap';}).length;
+  const todoCount=root.nodes.filter(function(e){return e.v==='todo';}).length;
+  const rootEl=el('div','card root',
+    '<div class="kick">'+root.kick+'</div>'+
+    '<div class="title">'+root.title+'<span class="cur"></span></div>'+
+    '<div class="sub">'+root.sub+'</div>'+
+    '<div class="stat">'+root.nodes.length+' 端点 · '+
+      (gapCount?gapCount+' 缺口 · ':'')+(todoCount?todoCount+' 待验证':'全部已验')+'</div>');
+  rootEl.style.width=GEO.ROOT_W+'px';
+  rootEl.style.height=GEO.ROOT_H+'px';
+  rootEl.style.transform='translate('+GEO.ROOT_X+'px,'+(root._cy-GEO.ROOT_H/2)+'px)';
+  canvas.appendChild(rootEl);
+
+  const group={root:root,el:rootEl,engs:[],paths:[],collapsed:false,items:[]};
+
+  root.nodes.forEach(function(en,ei){
+    const vc=V[en.v].c;
+    const dly=(dIdx++)*22;
+    const pRoot=path(curve(GEO.ROOT_X+GEO.ROOT_W,root._cy,GEO.ENG_X,en._cy),dly);
+
+    const engEl=el('div','card eng',
+      '<div class="top">'+
+        '<span class="pfx">&gt;</span>'+
+        '<span class="nm">'+en.n+'</span>'+
+        '<span class="vt">[ '+V[en.v].t+' ]</span>'+
+      '</div>'+
+      '<div class="mid">'+en.e+'</div>'+
+      '<div class="bot">'+
+        '<span class="bs '+(BCLS[en.b]||'')+'">'+en.b+'</span>'+
+        (en.k?'<span class="kt">'+en.k+'</span>':'')+
+        '<span class="ev">'+en.ev+'</span>'+
+        '<span class="tm">−</span>'+
+      '</div>');
+    engEl.style.width=GEO.ENG_W+'px';
+    engEl.style.height=GEO.ENG_H+'px';
+    engEl.style.setProperty('--c',vc);
+    engEl.style.transform='translate('+GEO.ENG_X+'px,'+(en._cy-GEO.ENG_H/2)+'px)';
+    engEl.classList.add('enter');
+    setTimeout(function(){engEl.classList.remove('enter');},60+dly);
+    canvas.appendChild(engEl);
+
+    const advs=[],paths=[pRoot];
+    (en.a||[]).forEach(function(txt,i){
+      const yy=en._tops[i]+GEO.LEAF_H/2;
+      paths.push(path(curve(GEO.ENG_X+GEO.ENG_W,en._cy,GEO.ADV_X,yy),dly+40+i*22));
+      const a=el('div','card adv '+V[en.v].cls,
+        '<span class="chip">'+V[en.v].pri+'</span><span class="atx">'+txt+'</span>');
+      a.style.width=GEO.ADV_W+'px';
+      a.style.height=GEO.LEAF_H+'px';
+      a.style.transform='translate('+GEO.ADV_X+'px,'+(yy-GEO.LEAF_H/2)+'px)';
+      a.classList.add('enter');
+      setTimeout(function(){a.classList.remove('enter');},80+dly+i*22);
+      canvas.appendChild(a);
+      advs.push(a);
+    });
+
+    const item={en:en,v:en.v,color:vc,el:engEl,advs:advs,paths:paths,group:group};
+    engEl.addEventListener('mouseenter',function(){focus(item);});
+    advs.forEach(function(a){a.addEventListener('mouseenter',function(){focus(item);});});
+    engEl.addEventListener('mouseleave',clearFocus);
+    advs.forEach(function(a){a.addEventListener('mouseleave',clearFocus);});
+    engEl.addEventListener('click',function(e){e.stopPropagation();toggleEng(item);});
+    group.engs.push(engEl); group.items.push(item);
+    group.paths=group.paths.concat(paths);
+    engs.push(item);
+  });
+
+  rootEl.addEventListener('click',function(){toggleGroup(group);});
+  roots.push(group);
+});
+
+/* -------------------------------- 交互状态 ------------------------------- */
+function focus(cur){
+  clearFocus();
+  engs.forEach(function(o){
+    const on=o===cur;
+    o.el.classList.toggle('dim',!on);
+    o.advs.forEach(function(a){a.classList.toggle('dim',!on);});
+    o.paths.forEach(function(p){
+      p.classList.toggle('hi',on);
+      p.style.stroke=on?cur.color:'';
+      p.style.filter=on?'drop-shadow(0 0 5px '+cur.color+')':'';
+      p.style.opacity=on?'':'.16';
+    });
+  });
+  roots.forEach(function(g){
+    g.el.classList.toggle('dim',g!==cur.group);
+  });
+}
+function clearFocus(){
+  engs.forEach(function(o){
+    o.el.classList.remove('dim');
+    o.advs.forEach(function(a){a.classList.remove('dim');});
+    o.paths.forEach(function(p){p.classList.remove('hi');p.style.stroke='';p.style.filter='';p.style.opacity='';});
+  });
+  roots.forEach(function(g){g.el.classList.remove('dim');});
+}
+function applyEngCollapse(o,on){
+  o.collapsed=on;
+  o.advs.forEach(function(a){a.classList.toggle('hidden',on);});
+  o.paths.slice(1).forEach(function(p){p.classList.toggle('hidden',on);});
+  const tm=o.el.querySelector('.tm');
+  if(tm)tm.textContent=on?'+':'−';
+}
+function toggleEng(o){applyEngCollapse(o,!o.collapsed);syncAllBtn();}
+function toggleGroup(g){
+  g.collapsed=!g.collapsed;
+  g.el.querySelector('.sub').style.opacity=g.collapsed?'.35':'';
+  g.items.forEach(function(o){applyEngCollapse(o,g.collapsed);});
+  syncAllBtn();
+}
+function allCollapsed(){
+  return roots.every(function(g){return g.items.every(function(o){return o.collapsed;});});
+}
+function syncAllBtn(){
+  document.getElementById('btnAll').textContent=allCollapsed()?'全部展开':'全部折叠';
+}
+document.getElementById('btnAll').addEventListener('click',function(){
+  const all=allCollapsed();
+  roots.forEach(function(g){
+    g.items.forEach(function(o){applyEngCollapse(o,!all);});
+    g.collapsed=!all;
+    g.el.querySelector('.sub').style.opacity=all?'':' .35';
+  });
+  syncAllBtn();
+});
+
+/* --------------------------------- 图例 --------------------------------- */
+const counts={ok:0,part:0,gap:0,todo:0};
+engs.forEach(function(o){counts[o.v]++;});
+const legend=document.getElementById('legend');
+let filter=null;
+['ok','part','gap','todo'].forEach(function(k){
+  if(!counts[k])return;
+  const c=el('div','lg','<i style="background:'+V[k].c+';color:'+V[k].c+'"></i>'+
+    V[k].t+' <span class="n">'+counts[k]+'</span>');
+  c.dataset.k=k;
+  c.addEventListener('click',function(){setFilter(k);});
+  legend.appendChild(c);
+});
+function setFilter(k){
+  filter=(filter===k)?null:k;
+  Array.prototype.forEach.call(legend.children,function(c){c.dataset.on=(c.dataset.k===filter)?'1':'0';});
+  engs.forEach(function(o){
+    const m=!filter||o.v===filter;
+    o.el.classList.toggle('muted',!m);
+    o.advs.forEach(function(a){a.classList.toggle('muted',!m);});
+    o.paths.forEach(function(p){p.classList.toggle('muted',!m);});
+  });
+}
+
+/* ------------------------------ 平移 / 缩放 ------------------------------ */
+let sc=1,tx=0,ty=-14;
+function apply(){canvas.style.transform='translate('+tx+'px,'+ty+'px) scale('+sc+')';}
+function smooth(on){canvas.classList.toggle('smooth',on);}
+function fit(){
+  const r=stage.getBoundingClientRect();
+  sc=Math.max(0.34,Math.min(1,(r.width-52)/CANVAS_W));
+  tx=(r.width-CANVAS_W*sc)/2;
+  ty=-14;
+  smooth(true);apply();
+}
+function overview(){
+  const r=stage.getBoundingClientRect();
+  sc=Math.max(0.22,Math.min((r.width-52)/CANVAS_W,(r.height-52)/CANVAS_H));
+  tx=(r.width-CANVAS_W*sc)/2;
+  ty=(r.height-CANVAS_H*sc)/2;
+  smooth(true);apply();
+}
+function zoomAt(k,mx,my){
+  const n=Math.max(0.22,Math.min(2.4,sc*k));
+  const f=n/sc;
+  tx=mx-f*(mx-tx);ty=my-f*(my-ty);sc=n;
+  smooth(true);apply();
+}
+document.querySelector('.tools').addEventListener('click',function(e){
+  const a=e.target.dataset.act,r=stage.getBoundingClientRect();
+  if(a==='in')zoomAt(1.2,r.width/2,r.height/2);
+  else if(a==='out')zoomAt(1/1.2,r.width/2,r.height/2);
+  else if(a==='fit')fit();
+  else if(a==='all-view')overview();
+});
+stage.addEventListener('wheel',function(e){
+  e.preventDefault();
+  const r=stage.getBoundingClientRect();
+  if(e.ctrlKey||e.metaKey){
+    zoomAt(Math.exp(-e.deltaY*0.0022),e.clientX-r.left,e.clientY-r.top);
+  }else{
+    smooth(false);tx-=e.deltaX;ty-=e.deltaY;apply();
+  }
+},{passive:false});
+
+let drag=null;
+stage.addEventListener('mousedown',function(e){
+  if(e.target.closest('.card'))return;
+  drag={x:e.clientX,y:e.clientY,tx:tx,ty:ty};
+  stage.classList.add('drag');smooth(false);
+});
+window.addEventListener('mousemove',function(e){
+  if(!drag)return;
+  tx=drag.tx+(e.clientX-drag.x);
+  ty=drag.ty+(e.clientY-drag.y);
+  apply();
+});
+window.addEventListener('mouseup',function(){drag=null;stage.classList.remove('drag');});
+window.addEventListener('resize',function(){fit();});
+
+fit();
+</script>
+</body>
+</html>
