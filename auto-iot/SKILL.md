@@ -1,5 +1,5 @@
 ---
-name: fore-vip-iot
+name: auto-iot
 slug: ai-iot
 displayName: 智控
 display_name: 智控

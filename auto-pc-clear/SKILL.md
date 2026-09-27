@@ -1,5 +1,5 @@
 ---
-name: fore-vip-pc-clear
+name: auto-pc-clear
 slug: pc-clear
 displayName: 电脑优化
 display_name: 电脑优化

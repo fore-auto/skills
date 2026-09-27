@@ -1,5 +1,5 @@
 ---
-name: fore-vip-geo-optimizer
+name: auto-geo
 slug: s-seo-geo
 displayName: GEO
 display_name: GEO

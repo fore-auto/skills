@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""gen_clean_script.py — 桌面一键清理脚本生成器（fore-vip-pc-clear）
+"""gen_clean_script.py — 桌面一键清理脚本生成器（auto-pc-clear）
 
 把本次清理会话记录的步骤生成为可重复执行的一键脚本，放到用户桌面：
 - macOS  → ~/Desktop/PC清理.command（自动 chmod +x）
@@ -97,7 +97,7 @@ def render_unix(data: dict, title: str) -> str:
     """生成 macOS .command / Linux .sh 脚本。"""
     lines = [
         "#!/bin/bash",
-        f"# {title} — 一键清理脚本（fore-vip-pc-clear 生成）",
+        f"# {title} — 一键清理脚本（auto-pc-clear 生成）",
         f"# 生成时间：{datetime.date.today().isoformat()}",
         "# 级别说明：A=安全可重复 | B=中等（注释已标影响） | C=敏感（执行前交互确认）",
         "set -u  # 未定义变量报错，但单步失败不中断（每步独立判断）",
@@ -148,7 +148,7 @@ def render_windows(data: dict, title: str) -> str:
     lines = [
         "@echo off",
         "chcp 65001 >nul",
-        f"rem {title} — 一键清理脚本（fore-vip-pc-clear 生成）",
+        f"rem {title} — 一键清理脚本（auto-pc-clear 生成）",
         f"rem 生成时间：{datetime.date.today().isoformat()}",
         f"setlocal EnableDelayedExpansion",
         "set /a TOTAL_OK=0",
