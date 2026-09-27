@@ -150,7 +150,7 @@
       "description": "说一句话把视频处理好：压小体积、剪一段、拼起来、转竖屏、加字幕或提取字幕、抽帧做封面、批量处理。第一次用会先检测你的电脑，再引导装好所需工具。",
       "path": "auto-video-cli-toolkit/",
       "category": "media",
-      "version": "1.0.0"
+      "version": "1.0.1"
     }
   ]
 }

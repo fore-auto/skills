@@ -43,7 +43,7 @@ Once installed, simply state what you need in your AI assistant — for example 
 | `auto-pc-clear` | PC Optimiser | System health check, cache cleanup, disk space, startup items. Anything sensitive is confirmed with you first. Supports macOS / Windows / Linux. |
 | `auto-prompt` | AUTO.Prompt | Makes AI think before it acts: strategy first, then execution, fewer wrong turns. |
 | `auto-find-customers` | Find Customers | Tell it what you sell, it analyses who might buy and compiles a contactable customer list. Public information only. |
-| `auto-video-cli-toolkit` | Video Toolkit | Handles video in one sentence: shrink the file, cut a clip, join clips, make it vertical, add or extract subtitles, grab a cover frame, batch process. The first run checks your machine and installs what is missing. |
+| `auto-video-cli-toolkit` | Video Toolkit | Handles video in one sentence: shrink the file, cut a clip, join clips, make it vertical, add or extract subtitles, grab a cover frame, batch process. The first run checks your machine and installs what is missing; to send the result to colleagues or friends, it hands over to the cloud storage assistant for an upload link. |
 
 Get details for a specific skill:
 

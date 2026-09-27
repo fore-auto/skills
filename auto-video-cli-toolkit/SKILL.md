@@ -8,7 +8,7 @@ description: 视频工具包（fore.vip）。面向不懂命令行的用户，�
 description_zh: 面向不懂命令行的用户的视频处理助手。先探测本机环境并按操作系统引导安装所需工具（含无管理员权限的用户级兜底），再把口语化需求映射为可直接执行的命令，自动补全分辨率、码率、输出路径等全部参数；素材探测覆盖方向、时长、音轨与字幕轨。覆盖压缩体积、裁剪拼接、竖屏适配、平台发布规格、音量与降噪、字幕提取与生成、抽帧封面、GIF、区域去水印、批量处理。全程只读原文件、绝不覆盖、绝不删除。
 description_en: "A video toolkit for people who would rather not touch the command line. It turns plain-language requests — this video is too big to send, cut out a clip, join these together, make it vertical for short-video platforms, add or remove subtitles, extract or replace the audio, convert the format, grab a cover frame, process a whole folder — into complete processing without the user learning a single flag. On first use it probes the machine (ffmpeg / yt-dlp / whisper / auto-editor and friends), then guides installation at the best location for the operating system, with a no-admin user-level fallback. It then probes the source file (resolution, duration, orientation, audio and subtitle tracks) and fills in every parameter — resolution, bitrate, output path — so the user picks an outcome instead of typing flags. Known engine limitations (such as a build without subtitle burn-in) are disclosed up front rather than after a failure. Use it for video compression, trimming, concatenation, vertical reframing, platform publish specs, audio cleanup, subtitle extraction or generation, cover frames, GIFs, logo removal and batch processing; also for asking what video tooling this machine has or what should be installed."
 category: media
-version: 1.0.0
+version: 1.0.1
 author: fore.vip
 owner: team
 agent_created: true
@@ -61,9 +61,11 @@ negative_triggers:
 
 - `scripts/detect_env.py` —— 环境探测，输出机器可读 JSON
 - `scripts/probe_media.py` —— 素材探测与参数推导，可生成并直接执行命令
+- `scripts/log_note.py` —— 经验回写器，把已修好的问题写进经验库并递进版本号
 - `references/cheatsheet.md` —— 操作码表，按用户意图分类
 - `references/install-matrix.md` —— 分系统安装位置与步骤
 - `references/recipes.md` —— 多步配方（批量、目标体积、混音、字幕等）
+- `references/field-notes.md` —— 实战经验库（自增长），动手前与报错后都要查
 
 脚本用 `python3` 执行；Windows 上用 `python`。若目标机器没有 Python，跳过脚本，直接依据 `references/cheatsheet.md` 的纯命令执行，环境判断改为逐条运行 `ffmpeg -version` 之类的探测命令。
 
@@ -85,6 +87,8 @@ python3 scripts/detect_env.py
 | `gaps.rec` | 缺失的推荐工具 | 影响能不能做「自动剪静音」「下载视频」等操作 |
 | `ffmpeg.limitations` | 引擎的能力缺陷 | 记下来，用户提到相关操作时**提前说明**，不要等失败 |
 | `install_plan` | 待装工具与命令 | 第 1 步直接照用 |
+
+同时翻一遍 `references/field-notes.md`。那是历次在真实机器上踩过并修好的问题清单，含症状与修正做法；先看它能省掉重复排查。若当前环境或用户诉求命中某条，直接按里面的做法走，并把这一步的结论一并写进给用户的说明。
 
 不要把 JSON 原样丢给用户。翻译成一句结论即可，例如：
 
@@ -171,6 +175,7 @@ python3 scripts/probe_media.py "<文件>" --target <平台> --outdir "<输出目
 3. 耗时预判：转码大体按「素材时长 × 0.5～3 倍」估算。超过 3 分钟的任务，先说一句预计耗时再执行。
 4. 含 `?` 的参数（例如 `0:a?`）必须加引号，否则在 zsh 下会报 `no matches found`。
 5. 一次只跑一条命令；批量任务改用 `references/recipes.md` 的脚本，脚本必须带「跳过已存在输出」和「单条失败不中断」。
+6. **命令失败时先查 `references/field-notes.md`**：命中症状就直接按里面的修正做法走，不要重新试错一遍。没命中再自行排查；排查通了的，按文末「经验回写」那一节回写。
 
 ### 第 5 步 · 验证与汇报
 
@@ -181,6 +186,22 @@ python3 scripts/probe_media.py "<文件>" --target <平台> --outdir "<输出目
    - 文件在哪（给完整路径）
    - 体积变化，例如「456 MB → 148 MB，减少 68%」
 4. 主动问一句是否还要做别的处理；若用户先前提过但未完成的项还在，提醒一下。
+
+### 第 6 步 · 分享出去（推荐转交 OSS 技能）
+
+成品要发给同事或朋友时，**不要用聊天软件直接发大文件**——常见限制是单文件 100MB 上下，且发送过程会压缩画质。标准做法是传到对象存储，拿链接发给对方。
+
+这一步**本技能不自己实现**，转交「OSS 对象存储助手」技能（`fore-vip-oss`）：它负责装厂商 CLI、引导配置 AK/SK 凭证。本技能只负责说清传哪个文件、以及提醒风险。
+
+固定动作：
+
+1. **先判是否已装**：本机已装 `fore-vip-oss` → 直接转交，把「要传的文件路径 + 收件人是谁 + 是否需要限时」一并带过去。
+2. **未装 → 引导安装**：告知用户到技能市场（SKILLHUB.cn）搜索「OSS 对象存储助手」安装，装好后重新发起同一需求即可转交。**不写死版本号**，版本以技能页当前显示的为准。
+3. **讲清为什么不直接发**：聊天工具对大文件有限制、传输会压缩画质；链接方式不压缩、可多次下载、可随时失效。
+4. **必须提醒的两件事**：
+   - **内容敏感性**：私人视频不要设成公开读；用签名 URL（限时链接）分享，过期自动失效。
+   - **费用**：对象存储按量计费，视频这类大文件会产生流量费，上传前先说明。
+5. **命名建议**：切片文件名带上日期与序号（如 `20260928-花絮-01.mp4`），对方下载后能认出顺序。
 
 ---
 
@@ -210,6 +231,7 @@ python3 scripts/probe_media.py "<文件>" --target <平台> --outdir "<输出目
 | 剪掉说错的地方 / 去掉停顿 | `auto-editor`，需第 1 步装上 |
 | 把网上的视频存下来 | `yt-dlp`，需第 1 步装上 |
 | 一整个文件夹都要处理 | 批量配方 |
+| 发给同事 / 发给朋友 / 文件太大传不过去 | 转交 OSS 技能，上传后给链接（见第 6 步） |
 
 ## 交互话术规范
 
@@ -226,6 +248,50 @@ python3 scripts/probe_media.py "<文件>" --target <平台> --outdir "<输出目
 | 无音轨 | 这个视频本身没有声音 |
 | libass 未编译 | 当前引擎不支持把字幕压进画面，需要补装 |
 | 引擎未安装 | 需要先装视频处理引擎，我来引导你完成 |
+| 对象存储 / OSS | 传到云上的一个空间，拿一个链接发给对方 |
+| 签名 URL | 限时链接，过了时间就打不开 |
+| 回写经验库 | 把这个坑记下来，下次不用再踩一遍 |
+
+## 经验回写（技能自增长）
+
+本技能不是一次性交付物。每一次在真实素材、真实机器上踩到并修好的问题，都要在**同一轮对话内**回写进经验库，让下一个遇到同样情况的人省掉排查。
+
+### 什么时候回写（满足任一条即写）
+
+1. 用户遇到的报错不在 `references/field-notes.md` 里，且已被修好；
+2. `references/cheatsheet.md` 里某条命令在真实素材上失败，并作了修正；
+3. 平台规格、引擎行为、包名通道发生变化；
+4. 找到了更短路径或更稳的替代做法。
+
+### 怎么回写
+
+```bash
+python3 scripts/log_note.py \
+  --symptom "一句话症状（用户视角）" \
+  --cause "根因（技术视角）" \
+  --fix "修正做法（可复制的命令或规则）" \
+  --verify "怎么确认修好了" \
+  --scope "影响哪些操作" \
+  --env "系统 / 版本 / 素材规格"
+```
+
+脚本负责编号、查重、递进版本号。**不要手改 `field-notes.md`**。
+
+- 症状与库里已有条目重复（含改写型近义，按字符相似度判定）→ 脚本拒绝写入并指向已有编号；确认是同一个坑，就在那条下补一行复现日期，不新增条目。
+- 确认是不同问题 → 加 `--force`。
+- 只追加，不改写历史条目；旧条目过时就新增一条并互相引用。
+
+### 同步到码表与安装矩阵
+
+经验库记录「为什么」，`cheatsheet.md` / `install-matrix.md` 记录「怎么做」。**凡是修正了具体命令或包名的，必须同时改码表**——否则经验库写着对的做法、码表里还是错的，下一个人会照着错的抄。
+
+回写顺序固定：**先改码表 / 安装矩阵 → 再写经验库 → 最后核对版本号**。
+
+### 硬性边界
+
+- **不写什么**：一次性环境故障（磁盘满、网络抖动）、未经复现的猜测、与技能职责无关的失败。判断标准：这个坑明天换一台机器、换一个人来做，还会不会踩？会 → 写。
+- **不写用户隐私**：经验库只记技术事实，**不得写入用户素材的文件名、路径、内容摘要、账号信息**。
+- **版本号由脚本递进**（PATCH 位 +1）；技能若收在家族仓库里，脚本会提示 `package.json` 的登记版本需要同步改。
 
 ## 边界与禁止事项
 
@@ -236,3 +302,5 @@ python3 scripts/probe_media.py "<文件>" --target <平台> --outdir "<输出目
 - 不承诺 AI 级画面修复：本工具链不具备生成式修复能力，去水印只能做区域填充，会有痕迹。
 - 涉及长时间高负载任务（补帧、逐帧处理）时先说明耗时，再询问是否继续。
 - 用户明确表示不需要技术细节时，不要再解释原理，直接给结果。
+- **不擅自上传**：用户的视频不上传到任何云端，除非用户明确要求分享；上传动作转交 OSS 技能，先提醒内容敏感性与费用。
+- **不臆造对象存储命令**：各厂商 CLI 版本迭代快（尤其 ossutil 1.x / 2.x），上传命令细节一律交给 OSS 技能按其官方文档给出，本技能不硬编。
