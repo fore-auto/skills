@@ -171,6 +171,7 @@ header{border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba
 .btn:hover{border-color:var(--brand);color:#fff;background:var(--brand-dim)}
 .btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
 .btn.primary:hover{background:var(--brand-soft);border-color:var(--brand-soft)}
+.hd-actions{display:flex;align-items:center;gap:10px;flex:none}
 .hero{padding:64px 0 40px}
 h1{font-size:clamp(28px,5vw,42px);line-height:1.24;font-weight:500;letter-spacing:-.01em}
 h1 em{color:var(--brand);font-style:normal}
@@ -207,14 +208,17 @@ h1 em{color:var(--brand);font-style:normal}
 footer{border-top:1px solid var(--line);margin-top:26px;padding:26px 0 44px;color:var(--muted);font-size:13px}
 .foot{display:flex;flex-wrap:wrap;gap:14px;justify-content:space-between}
 .foot a:hover{color:var(--brand)}
-@media (max-width:560px){.hero{padding:40px 0 28px}.card{padding:18px}.meta{font-size:11px}}
+@media (max-width:560px){.hero{padding:40px 0 28px}.card{padding:18px}.meta{font-size:11px}.hd .btn{padding:7px 11px;font-size:12.5px}.allsz{display:none}}
 </style>
 </head>
 <body>
 <header>
   <div class="wrap hd">
     <a class="brand" href="/"><span class="dot"></span>AUTO <em>Skills</em></a>
-    <a class="btn primary" href="/api/zip?skill=all" download>下载全部 · ${kb(allZipBytes)}</a>
+    <div class="hd-actions">
+      <a class="btn" href="https://skillhub.cn/skills/user_c3d829cb" target="_blank" rel="noopener">更多技能</a>
+      <a class="btn primary" href="/api/zip?skill=all" download>下载全部<span class="allsz"> · ${kb(allZipBytes)}</span></a>
+    </div>
   </div>
 </header>
 
