@@ -1,6 +1,6 @@
 # AUTO Skills
 
-> Let AI do it for you — build a website, clean up your computer, control your hardware, find customers.
+> Let AI do it for you — build a website, clean up your computer, control your hardware, process video, find customers.
 
 [![npm version](https://img.shields.io/npm/v/@fore-auto/skills.svg)](https://www.npmjs.com/package/@fore-auto/skills)
 [![npm downloads](https://img.shields.io/npm/dm/@fore-auto/skills.svg)](https://www.npmjs.com/package/@fore-auto/skills)
@@ -28,7 +28,7 @@ npx @fore-auto/skills add --all
 npx @fore-auto/skills add auto-geo
 ```
 
-Once installed, simply state what you need in your AI assistant — for example "clean up my computer", "build me a website", or "find me some customers".
+Once installed, simply state what you need in your AI assistant — for example "clean up my computer", "build me a website", "find me some customers", or "make this video smaller".
 
 ---
 
@@ -43,6 +43,7 @@ Once installed, simply state what you need in your AI assistant — for example 
 | `auto-pc-clear` | PC Optimiser | System health check, cache cleanup, disk space, startup items. Anything sensitive is confirmed with you first. Supports macOS / Windows / Linux. |
 | `auto-prompt` | AUTO.Prompt | Makes AI think before it acts: strategy first, then execution, fewer wrong turns. |
 | `auto-find-customers` | Find Customers | Tell it what you sell, it analyses who might buy and compiles a contactable customer list. Public information only. |
+| `auto-video-cli-toolkit` | Video Toolkit | Handles video in one sentence: shrink the file, cut a clip, join clips, make it vertical, add or extract subtitles, grab a cover frame, batch process. The first run checks your machine and installs what is missing. |
 
 Get details for a specific skill:
 

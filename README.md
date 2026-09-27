@@ -1,6 +1,6 @@
 # AUTO Skills
 
-> 让 AI 帮你自动建站、优化电脑、控制硬件、挖掘客户。
+> 让 AI 帮你自动建站、优化电脑、控制硬件、处理视频、挖掘客户。
 
 [![npm version](https://img.shields.io/npm/v/@fore-auto/skills.svg)](https://www.npmjs.com/package/@fore-auto/skills)
 [![npm downloads](https://img.shields.io/npm/dm/@fore-auto/skills.svg)](https://www.npmjs.com/package/@fore-auto/skills)
@@ -28,7 +28,7 @@ npx @fore-auto/skills add --all
 npx @fore-auto/skills add auto-geo
 ```
 
-装好后在 AI 助手里直接说需求即可，比如「帮我优化下电脑」「给我搭个官网」「看看还缺哪些客户」。
+装好后在 AI 助手里直接说需求即可，比如「帮我优化下电脑」「给我搭个官网」「看看还缺哪些客户」「把这个视频压小点」。
 
 ---
 
@@ -43,6 +43,7 @@ npx @fore-auto/skills add auto-geo
 | `auto-pc-clear` | 电脑优化 | 电脑体检、清缓存、腾硬盘、优化开机启动项。敏感操作会先问你。支持 macOS / Windows / Linux。 |
 | `auto-prompt` | AUTO.Prompt | 让 AI 先想清楚再动手：先给策略，再执行，少走弯路。 |
 | `auto-find-customers` | 找客户 | 说清你卖什么，分析谁可能买，整理出可联系的客户清单。只使用公开信息。 |
+| `auto-video-cli-toolkit` | 视频工具包 | 说一句话把视频处理好：压小体积、剪一段、拼起来、转竖屏、加字幕或提取字幕、抽帧做封面、批量处理。第一次用会先检查你的电脑，再引导装好所需工具。 |
 
 查看某个技能的详细信息：
 

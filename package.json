@@ -1,7 +1,7 @@
 {
   "name": "@fore-auto/skills",
   "version": "1.0.0",
-  "description": "AUTO 品牌 Agent Skills 合集：让 AI 帮你自动建站、优化电脑、控制硬件、挖掘客户、产出内容。装一次，说一句话就能用。",
+  "description": "AUTO 品牌 Agent Skills 合集：让 AI 帮你自动建站、优化电脑、控制硬件、处理视频、挖掘客户、产出内容。装一次，说一句话就能用。",
   "keywords": [
     "agent-skill",
     "ai-skill",
@@ -34,7 +34,14 @@
     "找客户",
     "prompt",
     "prompt-engineering",
-    "提示词"
+    "提示词",
+    "video",
+    "video-editing",
+    "video-compression",
+    "ffmpeg",
+    "视频处理",
+    "视频压缩",
+    "视频剪辑"
   ],
   "author": "fore.vip",
   "license": "MIT",
@@ -55,6 +62,7 @@
     "auto-pc-clear/",
     "auto-prompt/",
     "auto-site-builder/",
+    "auto-video-cli-toolkit/",
     "bin/",
     "README.md",
     "README.en.md",
@@ -135,6 +143,14 @@
       "path": "auto-find-customers/",
       "category": "sales",
       "version": "1.0.2"
+    },
+    {
+      "name": "auto-video-cli-toolkit",
+      "displayName": "视频工具包",
+      "description": "说一句话把视频处理好：压小体积、剪一段、拼起来、转竖屏、加字幕或提取字幕、抽帧做封面、批量处理。第一次用会先检测你的电脑，再引导装好所需工具。",
+      "path": "auto-video-cli-toolkit/",
+      "category": "media",
+      "version": "1.0.0"
     }
   ]
 }
