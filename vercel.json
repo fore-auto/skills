@@ -1,0 +1,15 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "node scripts/build-site.mjs",
+  "outputDirectory": "dist",
+  "cleanUrls": false,
+  "trailingSlash": false,
+  "functions": {
+    "api/zip.js": {
+      "includeFiles": "auto*/**"
+    }
+  },
+  "github": {
+    "silent": true
+  }
+}

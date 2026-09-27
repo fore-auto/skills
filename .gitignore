@@ -18,6 +18,9 @@ build/
 *.log
 npm-debug.log*
 
+# ---- Vercel CLI 本地状态 ----
+.vercel/
+
 # ---- 发布打包产物（本地生成，不入库）----
 *.zip
 

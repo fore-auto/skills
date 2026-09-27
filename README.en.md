@@ -79,9 +79,9 @@ To uninstall, just delete the skill folder — `~/.workbuddy/skills/` for user-l
 
 ## Manual install
 
-If `npx` is not available to you, you can install manually:
+If `npx` is not available to you, grab the zip from <https://skills.fore.vip>:
 
-1. Download the skill folder you need from the [GitHub repository](https://github.com/fore-auto/skills);
+1. Download the zip you need and unzip it into a `skill-name/` folder;
 2. Place it into `~/.workbuddy/skills/` (or `.workbuddy/skills/` inside your project);
 3. Make sure the folder contains a `SKILL.md`.
 

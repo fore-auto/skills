@@ -69,7 +69,7 @@ const skills = Array.isArray(pkg.skills) ? pkg.skills : [];
 if (!skills.length) FAIL('package.json 的 skills 清单为空');
 
 // 仓库根即技能根：技能目录直接平铺在根下，排除工程目录
-const RESERVED = new Set(['node_modules', 'bin', 'scripts', 'docs']);
+const RESERVED = new Set(['node_modules', 'bin', 'scripts', 'docs', 'api', 'dist']);
 const diskSkills = fs.readdirSync(ROOT, { withFileTypes: true })
   .filter((d) => d.isDirectory() && !d.name.startsWith('.') && !d.name.startsWith('_') && !RESERVED.has(d.name))
   .map((d) => d.name);

@@ -77,6 +77,8 @@
   },
   "scripts": {
     "list": "node bin/cli.js list",
+    "build": "node scripts/build-site.mjs",
+    "dev": "node scripts/dev-site.mjs",
     "check": "node scripts/prepublish.mjs",
     "docs:check": "node scripts/check-readme-sync.mjs",
     "prepublishOnly": "node scripts/prepublish.mjs",
@@ -142,7 +144,7 @@
       "description": "输入你的产品或服务，分析产业链下游，采集可联系的目标客户线索并整理成清单，支持邮件直推。只用公开信息。",
       "path": "auto-find-customers/",
       "category": "sales",
-      "version": "1.0.2"
+      "version": "2.2.2"
     },
     {
       "name": "auto-video-cli-toolkit",

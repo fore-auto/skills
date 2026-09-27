@@ -79,9 +79,9 @@ npx @fore-auto/skills add --all --force
 
 ## 手动安装
 
-不方便使用 `npx` 时，也可以手动安装：
+不方便使用 `npx` 时，到下载站 <https://skills.fore.vip> 点技能卡片即可拿到 zip：
 
-1. 从 [GitHub 仓库](https://github.com/fore-auto/skills) 下载需要的技能目录；
+1. 下载需要的技能 zip，解压得到 `技能名/` 目录；
 2. 放进 `~/.workbuddy/skills/`（或项目的 `.workbuddy/skills/`）；
 3. 确认目录里有 `SKILL.md`。
 
