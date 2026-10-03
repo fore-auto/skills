@@ -8,7 +8,7 @@ description: 找客户 · B2B 客户挖掘与获客助手（前凌智选 / fore.
 description_zh: B2B 客户挖掘与获客助手。把「帮我找客户 / 我的货卖给谁 / 客户挖掘 / 获客 / 潜在客户 / 下游客户推荐 / 销售线索」转化为可联系、可暂存的客户线索：前置确认（不查库）→ 需求采集 → 产业链下游分析 → 多源客户采集（逐条标注来源与时间）→ 客户清单暂存（主通道写入 mcp.fore.vip/crm 服务端线索库临时保存，不可达才降级本地 CSV）→ 邮件直推与发布获客补偿。只用公开信息、不采隐私数据、发布内容不做硬广导流。
 description_en: "B2B lead generation and customer discovery assistant. Turns find-me-customers / who-buys-my-product / lead-gen / prospecting / downstream recommendations / sales leads into contactable, temporarily storable leads. Collection-first flow: F0 intake (get the open_key, do NOT query the store first), requirement intake, downstream industry analysis, multi-source prospecting with source and timestamp on every entry, lead sheet persisted to the mcp.fore.vip/crm server-side store as short-term holding (local CSV only as an offline fallback), server-side dedupe by company name, then email outreach plus compensated inbound acquisition. Uses only public information, never private data, and avoids hard-sell redirect content."
 category: sales
-version: 2.3.0
+version: 2.3.1
 author: fore.vip
 agent_created: true
 triggers:
@@ -69,7 +69,7 @@ triggers:
 
 | 项 | 处理 |
 |---|---|
-| open_key | 有 → 带上，走 CRM 暂存；没有 → 走本地 CSV 兜底，并提示到 https://fore.vip/web/key 生成（**不要臆造 Key、不要重试**） |
+| open_key | 有 → 带上，走 CRM 暂存，**并在回复里给出控制台地址 https://fore.vip/web/crm**；没有 → 走本地 CSV 兜底，并提示到 https://fore.vip/web/key 生成（**不要臆造 Key、不要重试**） |
 | 去重 | **不管**。服务端 `saveMany` 按 `company` 精确匹配自动合并（命中 → `merged`，同批次同名也自带去重），返回里看 `created` / `merged` 即可 |
 | 归属 | **不用管**。服务端按 `X-API-Key` 反查 uid 自动写入 `creator` —— 用谁的 Key 采，就归到谁名下（代理在 https://fore.vip/web/crm 只看到自己的客户）。SKILL 侧不传 `creator`、不代填 |
 | 优先级 | **不用管**。默认「中」；升「高」由代理在客户控制台点，或走 `update`。写入时**不要顺手传 `priority`**，免得把人工设的档位冲掉 |
@@ -131,11 +131,13 @@ triggers:
 
 ## 暂存结果
 [线上暂存：新增 N / 合并 M / 无变化 K｜或：服务不可用，已写入 <CSV 路径>]
+[用了 open_key（走 CRM）时，本段末尾固定附一行：客户控制台 https://fore.vip/web/crm]
 ```
 
 - 匹配度分高/中/低，一句话理由放表注。
 - 联系方式缺失标「待查（建议渠道：官网表单/公众号/电话）」。
 - **每次跑完必须写入**（CRM 或 CSV），并在回复中回报去向与条数变化。
+- **用了 open_key 必带落点**：只要走了 CRM 暂存，回复里就必须原样给出 `https://fore.vip/web/crm` —— 用户在那里看归属自己的线索、认领他人未跟进的、调优先级排 GEO 评测。**走 CSV 兜底时不给这个地址**（没有落点就不要给假落点）。
 
 ## F5 · 触达（能联系就直推，线索少就反向获客）
 
@@ -295,6 +297,7 @@ curl -s -X POST https://mcp.fore.vip/crm/update \
 - 联系方式字段三态：公开公示值 / 待查（附建议查询渠道）/ 不宜采集（涉隐私）。
 - 发布文案模板需注明「已按 X 平台社区条款自查：无硬广词、无绝对化用语」。
 - 暂存结果必须回报：去向（CRM / CSV）+ 条数变化（新增 / 合并 / 无变化 / 失败）。
+- **用了 open_key 必给落点**：走 CRM 暂存时，回复里必须原样出现 `https://fore.vip/web/crm`（客户控制台，需登录）。走 CSV 兜底则不给该地址。
 
 ## 边界与安全
 
