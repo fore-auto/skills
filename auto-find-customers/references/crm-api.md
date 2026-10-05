@@ -4,7 +4,7 @@
 
 **服务定位**：`https://mcp.fore.vip/crm` —— 只是给线索找地方**临时存放**，方便换个会话继续用。它不是长期存储：**请自行定期导出留存**，服务端不承诺永久保留。因此跑采集**前不查库**，`search` / `stats` 只在你明确要「查已有线索 / 改某家状态」时才调；重复由服务按企业名称自动合并。
 
-> **2026-09-30 起的新语义**：线索写入时会自动**归属**到 `X-API-Key` 所属用户（字段 `creator`），并支持 `priority`（高/中/低）。代理在 fore.vip 的「客户控制台」（https://fore.vip/web/crm）只能看到归属自己的线索；优先级为「高」的线索会被自动任务排入 GEO 评测队列，评测报告 URL 与质量评分由任务回写进来。**这两项都不需要 SKILL 传参**，正常批量写入即可。
+> **2026-09-30 起的新语义**：线索写入时会自动**归属**到 `X-API-Key` 所属用户（字段 `creator`），并支持 `priority`（高/中/低）。联盟会员在 fore.vip 的「客户控制台」（https://fore.vip/web/crm）只能看到归属自己的线索；优先级为「高」的线索会被自动任务排入 GEO 评测队列，评测报告 URL 与质量评分由任务回写进来。**这两项都不需要 SKILL 传参**，正常批量写入即可。
 
 ## 一、端点
 
@@ -30,14 +30,15 @@
 | `contact` | — | 256 | 联系方式，多值半角 `;` |
 | `email` | — | 256 | 邮箱，多值半角 `;` |
 | `product` | — | 128 | **对方企业自身**的品牌/主营产品 |
+| `type` | — | 枚举 | `lead`（线索，默认）/ `need`（需求）。**不要传** —— 本技能落库一律 `lead`；`need` 只在客户控制台「发布需求」产生。读取时缺该字段的历史行按 `lead` 处理 |
 | `status` | — | 枚举 | `未接触`（默认）/ `已触达` / `待跟进` / `已成交` / `交付中` / `已完成` / `已放弃` |
 | `owner` | — | 128 | 负责人，多值半角 `;`；查不到写「待查」 |
-| `remark` | — | 500 | 备注；匹配度写前缀 `[匹配度·高] …` |
+| `remark` | — | 500 | 详情（控制台界面显示名；CSV 兜底第 10 列列名仍是「备注」）；匹配度写前缀 `[匹配度·高] …` |
 | `source` | — | 256 | 来源·时间；模型知识标「模型知识·待验证」 |
-| `creator` | — | 64 | **归属代理 uid。一般不要传** —— 服务端按 `X-API-Key` 自动写入；只在管理员代录、需要指定归属时才显式传。**已有归属不会被覆盖** |
+| `creator` | — | 64 | **归属联盟会员 uid。一般不要传** —— 服务端按 `X-API-Key` 自动写入；只在管理员代录、需要指定归属时才显式传。**已有归属不会被覆盖** |
 | `priority` | — | 枚举 | `高` / `中`（默认）/ `低`。`高` = 排入 GEO 评测队列。**改优先级走 `update`，不要在批量写入时顺手传** |
 | `quality_score` | — | 0–100 整数 | GEO 质量评分，由自动任务回写；人工可覆盖。**传 `0` 是合法分**（区别于「没传」） |
-| `report_url` | — | 512 | GEO 评测报告公开 URL，由自动任务回写；**非空即视为已出报告**，任务不会重复生成 |
+| `report_url` | — | 512 | GEO 评测报告公开 URL，由自动任务回写；**非空即视为已出报告**，任务不会重复生成。**检索 / 详情的结果会带上该链接**，拿到就直接给用户看 |
 | `report_time` | — | 毫秒时间戳 | 报告生成时间。写 `report_url` 时若不传，服务端自动补当前时间 |
 
 - 多值字段一律半角 `;` 分隔（全角 `；` 也能被识别，但优先传半角）。
@@ -50,7 +51,7 @@
 | `save` | `company`（必填）+ 其余字段 | `action: created / merged / unchanged` + `id` + `creator` + `priority` |
 | `saveMany` | `companies` 数组，**1–100 条/次** | `total` / `created` / `merged` / `unchanged` / `failed[]` |
 | `search` | `keyword`（名称/产品模糊）· `industry` · `status` · `priority` · `mine` · `creator` · `page` · `pageSize`（默认 20，上限 50） | `list` + `total` |
-| `detail` | `id` 或 `company`（`id` 优先） | 单条记录（含 `creator` / `priority` / `quality_score` / `report_url`） |
+| `detail` | `id` 或 `company`（`id` 优先） | 单条记录（含 `type` / `creator` / `priority` / `quality_score` / `report_url`） |
 | `update` | `id`（必填）+ 待改字段（含 `priority` / `quality_score` / `report_url`） | `action: updated / unchanged` |
 | `delete` | `id`（必填） | `deleted` + `company` |
 | `stats` | `industry`（可选）· `creator`（可选）；均省略即全量 | `total` + 状态分布 + **优先级分布** + 行业分布 |
@@ -60,9 +61,10 @@
 - **合并语义**（写入侧只需理解这一条规则）：按企业名称精确匹配，命中即合并——联系方式/邮箱取并集，空值不覆盖已有值；未命中则新增。**所以不用先查再写。**
 - **归属自动落库**：写入时服务端从 `X-API-Key` 反查用户 uid 写入 `creator`；已存在的记录**归属不会被后来的写入改掉**（防串户）。所以「谁用哪把 Key 采，就归到谁名下」，SKILL 侧无需关心。
 - `saveMany` 单条失败不中断整批，看 `failed[]` 明细逐条回报即可，不整批回滚。
-- `status` / `priority` 只在**显式传入**时改写：批量写入时不要顺手传，避免把已跟进的打回「未接触」、把人工设的「高」冲掉；改这两项走单独的 `update`。
+- `status` / `priority` / `type` 只在**显式传入**时改写：批量写入时不要顺手传，避免把已跟进的打回「未接触」、把人工设的「高」冲掉、或把控制台发出的「需求」打成「线索」；改状态与优先级走单独的 `update`，`type` 本技能一律不传（落库即 `lead`）。
 - `update` 语义是「非空即写」，传空字符串等于不改；`quality_score` 例外——传 `0` 会照写。
 - 想只看某人的线索：`mine: true`（等价于 `creator` = 当前 Key 的 uid），或显式传 `creator: "<uid>"`。
+- **`type`（线索 / 需求）不参与筛选**：历史行没有该字段，服务端精确匹配会把它们**整批漏掉**。要区分类型请读返回记录的 `type` —— 缺字段即按 `lead` 处理。
 
 ## 四、错误码与处置
 
@@ -86,7 +88,7 @@
 ## 六、调用示例
 
 ```bash
-# 批量写入（归属与优先级都不用传：归属自动落，优先级默认「中」）
+# 批量写入（归属 / 优先级 / 记录类型都不用传：归属自动落，优先级默认「中」，记录类型一律 lead）
 curl -s -X POST https://mcp.fore.vip/crm/saveMany \
   -H 'Content-Type: application/json' \
   -H 'X-API-Key: <open_key>' \
@@ -98,7 +100,7 @@ curl -s -X POST https://mcp.fore.vip/crm/update \
   -H 'X-API-Key: <open_key>' \
   -d '{"id":"<线索 id>","status":"已触达"}'
 
-# 只看自己的线索（代理场景）
+# 只看自己的线索（联盟会员场景）
 curl -s -X POST https://mcp.fore.vip/crm/search \
   -H 'Content-Type: application/json' \
   -H 'X-API-Key: <open_key>' \

@@ -8,7 +8,7 @@ description: 找客户 · B2B 客户挖掘与获客助手（前凌智选 / fore.
 description_zh: B2B 客户挖掘与获客助手。把「帮我找客户 / 我的货卖给谁 / 客户挖掘 / 获客 / 潜在客户 / 下游客户推荐 / 销售线索」转化为可联系、可暂存的客户线索：前置确认（不查库）→ 需求采集 → 产业链下游分析 → 多源客户采集（逐条标注来源与时间）→ 客户清单暂存（主通道写入 mcp.fore.vip/crm 服务端线索库临时保存，不可达才降级本地 CSV）→ 邮件直推与发布获客补偿。只用公开信息、不采隐私数据、发布内容不做硬广导流。
 description_en: "B2B lead generation and customer discovery assistant. Turns find-me-customers / who-buys-my-product / lead-gen / prospecting / downstream recommendations / sales leads into contactable, temporarily storable leads. Collection-first flow: F0 intake (get the open_key, do NOT query the store first), requirement intake, downstream industry analysis, multi-source prospecting with source and timestamp on every entry, lead sheet persisted to the mcp.fore.vip/crm server-side store as short-term holding (local CSV only as an offline fallback), server-side dedupe by company name, then email outreach plus compensated inbound acquisition. Uses only public information, never private data, and avoids hard-sell redirect content."
 category: sales
-version: 2.3.1
+version: 2.3.2
 author: fore.vip
 agent_created: true
 triggers:
@@ -71,8 +71,8 @@ triggers:
 |---|---|
 | open_key | 有 → 带上，走 CRM 暂存，**并在回复里给出控制台地址 https://fore.vip/web/crm**；没有 → 走本地 CSV 兜底，并提示到 https://fore.vip/web/key 生成（**不要臆造 Key、不要重试**） |
 | 去重 | **不管**。服务端 `saveMany` 按 `company` 精确匹配自动合并（命中 → `merged`，同批次同名也自带去重），返回里看 `created` / `merged` 即可 |
-| 归属 | **不用管**。服务端按 `X-API-Key` 反查 uid 自动写入 `creator` —— 用谁的 Key 采，就归到谁名下（代理在 https://fore.vip/web/crm 只看到自己的客户）。SKILL 侧不传 `creator`、不代填 |
-| 优先级 | **不用管**。默认「中」；升「高」由代理在客户控制台点，或走 `update`。写入时**不要顺手传 `priority`**，免得把人工设的档位冲掉 |
+| 归属 | **不用管**。服务端按 `X-API-Key` 反查 uid 自动写入 `creator` —— 用谁的 Key 采，就归到谁名下（联盟会员在 https://fore.vip/web/crm 只看到自己的客户）。SKILL 侧不传 `creator`、不代填 |
+| 优先级 | **不用管**。默认「中」；升「高」由联盟会员在客户控制台点，或走 `update`。写入时**不要顺手传 `priority`**，免得把人工设的档位冲掉 |
 
 **唯一查库入口**：用户明确说「查线索库 / 我的客户有哪些 / 改某公司状态」时，才调 `search` / `stats` / `update`（接口见 @references/crm-api.md 与下方「线索暂存」）。跑采集时一律不调。
 
@@ -136,6 +136,7 @@ triggers:
 
 - 匹配度分高/中/低，一句话理由放表注。
 - 联系方式缺失标「待查（建议渠道：官网表单/公众号/电话）」。
+- **已有评测报告的线索**：检索已有线索时，记录若带 `report_url`，把它一并给出（那是已生成的 GEO 评测报告，用户可直接打开）；**不要自己重跑评测**——那会跟自动任务抢活。
 - **每次跑完必须写入**（CRM 或 CSV），并在回复中回报去向与条数变化。
 - **用了 open_key 必带落点**：只要走了 CRM 暂存，回复里就必须原样给出 `https://fore.vip/web/crm` —— 用户在那里看归属自己的线索、认领他人未跟进的、调优先级排 GEO 评测。**走 CSV 兜底时不给这个地址**（没有落点就不要给假落点）。
 
@@ -211,19 +212,20 @@ triggers:
 | 邮箱 | `email` | 多个用半角 `;`；只取公开邮箱 |
 | 跟踪状态 | `status` | 枚举：`未接触`/`已触达`/`待跟进`/`已成交`/`交付中`/`已完成`/`已放弃`，默认 `未接触` |
 | 来源·时间 | `source` | 站点名或 URL·时间；模型知识标「模型知识·待验证」 |
-| 备注 | `remark` | 一句话理由或下一步动作 |
+| 详情 | `remark` | 一句话理由或下一步动作（控制台界面显示名已改「详情」；字段键仍是 `remark`，CSV 兜底第 10 列的列名也仍叫「备注」） |
 | — | `product` | 该企业**自身**的品牌/主营产品（识别用，非我方产品线） |
-| 匹配度 | **无独立字段** | 写入 `remark` 前缀：`[匹配度·高] 原始备注` |
+| 记录类型 | `type` | **不传** —— 本技能落库一律 `lead`（线索），服务端自动写；`need`（需求）只在客户控制台「发布需求」产生 |
+| 匹配度 | **无独立字段** | 写入 `remark` 前缀：`[匹配度·高] 原始详情` |
 | 归属 | `creator` | **不传** —— 服务端按 `X-API-Key` 自动落；已写入的不被覆盖 |
-| 优先级 | `priority` | **不传**（默认「中」）；「高」由代理在控制台点或走 `update` |
-| GEO 评测 | `report_url` / `quality_score` / `report_time` | **不写** —— 由 GEO 评测自动任务回写，本技能只读 |
+| 优先级 | `priority` | **不传**（默认「中」）；「高」由联盟会员在控制台点或走 `update` |
+| GEO 评测 | `report_url` / `quality_score` / `report_time` | **不写** —— 由 GEO 评测自动任务回写，本技能只读；但 `report_url` 有值时，`search` / `detail` 的结果行会带上链接，**拿到就直接给用户**（那是已生成的评测报告） |
 
 **写入语义（理解结果用）**
 
 - 按企业名称精确匹配：命中即合并，未命中即新增，返回 `created` / `merged` / `unchanged`。**去重就这一条，服务自带**——不需要先查再写。
 - `contact` / `email` 取并集；已填的值不会被空值覆盖。
-- `status` / `priority` 仅在显式传入时改写——**批量写入时不要顺手传状态或优先级**，避免把已跟进的打回「未接触」、把人工设的「高」冲掉；改这两项走单独的 `update`。
-- **归属自动落库**：服务端按 `X-API-Key` 反查 uid 写 `creator`，已有归属不会被后来的写入覆盖。所以代理之间天然隔离，无需 SKILL 处理。
+- `status` / `priority` / `type` 仅在显式传入时改写——**批量写入时不要顺手传这三项**，避免把已跟进的打回「未接触」、把人工设的「高」冲掉、或把控制台发出的「需求」打成「线索」；改状态与优先级走单独的 `update`，`type` 本技能一律不传（落库即 `lead`）。
+- **归属自动落库**：服务端按 `X-API-Key` 反查 uid 写 `creator`，已有归属不会被后来的写入覆盖。所以联盟会员之间天然隔离，无需 SKILL 处理。
 
 **批量与失败处理**
 
@@ -239,7 +241,7 @@ triggers:
 
 **鉴权：需要 open_key**
 
-- 凭证在 ** https://fore.vip/web/key **（「Open Key 管理」，需登录）生成；传输走 HTTP 头 `X-API-Key: <open_key>`，MCP 通道由客户端配置的 `headers` 携带。
+- 凭证在 **https://fore.vip/web/key**（「Open Key 管理」，需登录）生成；传输走 HTTP 头 `X-API-Key: <open_key>`，MCP 通道由客户端配置的 `headers` 携带。
 - **用户没有密钥时**：不要臆造、不要反复重试 —— 按「服务不可用」降级本地 CSV，并提示去上面页面生成。
 - **密钥不外泄**：只放进请求头；不写入文件、清单或给用户的回报，确需展示时只留首末各 4 位、其余打码。
 - 细节见 @references/crm-api.md。
