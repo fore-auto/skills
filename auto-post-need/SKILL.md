@@ -4,24 +4,47 @@ slug: post-need
 displayName: 发布需求
 display_name: 发布需求
 display_name_en: Post a Demand
-description: 发布需求 · 把「我要采购什么」发进共享需求池（fore.vip）。把「我要采购 / 我在找供应商 / 找货源 / 求购 / 发个需求」转化为一条结构化、可被对接的需求记录：N0 前置确认（拿 open_key）→ N1 需求采集（谁在要、要什么、量级、交期、结算、怎么联系）→ N2 规范化并请用户确认 → N3 同名预检（撞上同名企业即停下问，避免把别人的线索静默改成需求）→ N4 写入 mcp.fore.vip/crm（记录类型显式写 need）→ N5 回执与落点（https://fore.vip/web/crm）→ N6 收尾询问。没有 open_key 时不静默落本地文件 —— 产出「需求卡片」由用户自行发布。合规红线：不夸大、不承诺收益，正文不做硬广导流。当用户要发布自己的采购 / 合作 / 寻源需求时使用。
-description_zh: 把「我要采购 / 我在找供应商 / 找货源 / 求购」整理成一条结构化需求，写进联盟共享需求池：前置确认（拿 open_key）→ 需求采集 → 规范化并请用户确认 → 同名预检（撞名即停下问）→ 写入 crm（记录类型显式写 need）→ 回执与落点 → 收尾询问。没有 open_key 时不落本地文件，改出「需求卡片」由用户自行发布。需求正文不夸大、不做硬广。
-description_en: "Post a demand — turns \"I need to buy X / I am looking for a supplier / sourcing / a purchase requirement\" into one structured, contactable demand record and publishes it to the shared demand pool. Flow: intake (get the open_key), requirement capture, normalisation with an explicit user confirmation, a same-company pre-check that stops and asks before it can silently convert somebody else's lead into a demand, publish to mcp.fore.vip/crm with the record type explicitly set to need, receipt with the console link, then a closing offer to tailor the workflow. Without an open_key nothing is written locally — a shareable demand card is produced instead. No exaggeration and no hard-sell copy."
+description: 发布需求 · 采购 / 寻源 / 求购 / 询价 / 询盘 / 比价 / 招标 / 采购需求 / 买家需求 / 需求池 / 需求广场 / 我要采购 / 我要买 / 找供应商 / 找供货商 / 找货源 / 找厂家 / 找工厂 / 找代工 / 找服务商 / 找渠道：把你的需求整理成一条结构化记录，发进联盟共享需求池（fore.vip），供方据此来对接你；与「找客户」互为反向。
+description_zh: 采购 / 寻源 / 求购 / 询价 / 询盘 / 比价 / 招标 / 采购需求 / 买家需求 / 需求池 / 需求广场 / 我要采购 / 我要买 / 找供应商 / 找供货商 / 找货源 / 找厂家 / 找工厂 / 找代工 / 找服务商 / 找渠道：把你的需求整理成一条结构化记录，发进联盟共享需求池（fore.vip），供方据此来对接你；与「找客户」互为反向。
+description_en: "Post a demand / publish a demand / buying request / purchase requirement / procurement / sourcing / sourcing request / RFQ / request for quotation / suppliers wanted / find suppliers / find manufacturers / find factories / find OEM / find vendors / demand pool: turns your requirement into one structured record and publishes it to the shared demand pool (fore.vip) so suppliers come to you. The mirror of the find-customers skill."
 category: sales
-version: 1.0.0
+version: 1.0.1
 author: fore.vip
 owner: team
 agent_created: true
 triggers:
   - "发布需求"
+  - "发需求"
   - "发个需求"
   - "发布采购需求"
+  - "我要发布需求"
+  - "需求发布"
+  - "采购需求"
   - "我要采购"
   - "我要买"
-  - "找供应商"
-  - "找货源"
+  - "我想买"
+  - "我需要采购"
   - "求购"
+  - "求购信息"
   - "寻源"
+  - "询价"
+  - "询盘"
+  - "比价"
+  - "招标"
+  - "找供应商"
+  - "找供货商"
+  - "找货源"
+  - "找货"
+  - "找厂家"
+  - "找工厂"
+  - "找代工"
+  - "找服务商"
+  - "找渠道"
+  - "找批发商"
+  - "需求池"
+  - "需求广场"
+  - "买家需求"
+  - "买方需求"
 ---
 
 # 发布需求 · 把「我要采购什么」发进共享需求池
