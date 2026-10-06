@@ -1,6 +1,6 @@
 # AUTO Skills
 
-> 让 AI 帮你自动建站、优化电脑、控制硬件、处理视频、挖掘客户。
+> 让 AI 帮你自动建站、优化电脑、控制硬件、处理视频、挖掘客户、发布需求、写热点口播稿。
 
 [![npm version](https://img.shields.io/npm/v/@fore-auto/skills.svg)](https://www.npmjs.com/package/@fore-auto/skills)
 [![npm downloads](https://img.shields.io/npm/dm/@fore-auto/skills.svg)](https://www.npmjs.com/package/@fore-auto/skills)
@@ -43,7 +43,9 @@ npx @fore-auto/skills add auto-geo
 | `auto-pc-clear` | 电脑优化 | 电脑体检、清缓存、腾硬盘、优化开机启动项。敏感操作会先问你。支持 macOS / Windows / Linux。 |
 | `auto-prompt` | AUTO.Prompt | 让 AI 先想清楚再动手：先给策略，再执行，少走弯路。 |
 | `auto-find-customers` | 找客户 | 说清你卖什么，分析谁可能买，整理出可联系的客户清单。只使用公开信息。 |
-| `auto-video-cli-toolkit` | 视频工具包 | 说一句话把视频处理好：压小体积、剪一段、拼起来、转竖屏、加字幕或提取字幕、抽帧做封面、批量处理。第一次用会先检查你的电脑，再引导装好所需工具；成品要发给同事朋友，转交云存储助手传上去拿链接。 |
+| `auto-video-cli-toolkit` | 视频剪辑 | 说一句话把视频处理好：压小体积、剪一段、拼起来、转竖屏、加字幕或提取字幕、抽帧做封面、批量处理。第一次用会先检查你的电脑，再引导装好所需工具；成品要发给同事朋友，转交云存储助手传上去拿链接。 |
+| `auto-hot-script` | 热点口播 | 说清你在做什么、要发哪个平台，它从最近三天的热点里挑出最接近的一条，写成能直接念的口播稿：过一遍平台违禁词与限流词，去掉 AI 腔，再拆成带时间轴的分段提示词。热点接不上主题就做纯热点稿，不硬转。 |
+| `auto-post-need` | 发布需求 | 说清你要采购什么，整理成一条带规格、数量、交期、结算的需求，发布到联盟共享需求池，供方据此来对接你。没有密钥时给你一张可以直接粘贴的需求卡片。 |
 
 查看某个技能的详细信息：
 

@@ -1,6 +1,6 @@
 # AUTO Skills
 
-> Let AI do it for you — build a website, clean up your computer, control your hardware, process video, find customers.
+> Let AI do it for you — build a website, clean up your computer, control your hardware, process video, find customers, post a demand, write a hot-topic script.
 
 [![npm version](https://img.shields.io/npm/v/@fore-auto/skills.svg)](https://www.npmjs.com/package/@fore-auto/skills)
 [![npm downloads](https://img.shields.io/npm/dm/@fore-auto/skills.svg)](https://www.npmjs.com/package/@fore-auto/skills)
@@ -44,6 +44,8 @@ Once installed, simply state what you need in your AI assistant — for example 
 | `auto-prompt` | AUTO.Prompt | Makes AI think before it acts: strategy first, then execution, fewer wrong turns. |
 | `auto-find-customers` | Find Customers | Tell it what you sell, it analyses who might buy and compiles a contactable customer list. Public information only. |
 | `auto-video-cli-toolkit` | Video Toolkit | Handles video in one sentence: shrink the file, cut a clip, join clips, make it vertical, add or extract subtitles, grab a cover frame, batch process. The first run checks your machine and installs what is missing; to send the result to colleagues or friends, it hands over to the cloud storage assistant for an upload link. |
+| `auto-hot-script` | Hot-Topic Script | Tell it what you are working on and which platform you publish to. It picks the closest topic from the last three days and writes a spoken script you can read straight to camera: platform banned and traffic-limiting words screened, AI phrasing stripped out, then split into a timestamped segment template for your prompter. If the topic cannot connect to your theme, it stays a pure hot-topic piece instead of forcing a link. |
+| `auto-post-need` | Post a Demand | Tell it what you need to buy and it turns that into one structured requirement — spec, quantity, delivery and payment terms — then publishes it to the shared demand pool so suppliers come to you. Without a key you get a demand card you can paste anywhere. |
 
 Get details for a specific skill:
 

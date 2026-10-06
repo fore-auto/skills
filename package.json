@@ -41,7 +41,21 @@
     "ffmpeg",
     "视频处理",
     "视频压缩",
-    "视频剪辑"
+    "视频剪辑",
+    "hot-topic",
+    "script-writing",
+    "copywriting",
+    "热点口播",
+    "口播稿",
+    "热点选题",
+    "post-need",
+    "demand",
+    "procurement",
+    "sourcing",
+    "发布需求",
+    "采购需求",
+    "找供应商",
+    "寻源"
   ],
   "author": "fore.vip",
   "license": "MIT",
@@ -60,9 +74,11 @@
     "auto-geo/",
     "auto-iot/",
     "auto-pc-clear/",
+    "auto-post-need/",
     "auto-prompt/",
     "auto-site-builder/",
     "auto-video-cli-toolkit/",
+    "auto-hot-script/",
     "bin/",
     "README.md",
     "README.en.md",
@@ -153,6 +169,22 @@
       "path": "auto-video-cli-toolkit/",
       "category": "media",
       "version": "1.0.1"
+    },
+    {
+      "name": "auto-hot-script",
+      "displayName": "热点口播",
+      "description": "说清你在做什么、要发哪个平台，它从最近三天的热点里挑出最接近的一条，写成能直接念的口播稿：过一遍平台违禁词与限流词，去掉 AI 腔，再拆成带时间轴的分段提示词。热点接不上主题就做纯热点稿，不硬转。",
+      "path": "auto-hot-script/",
+      "category": "content",
+      "version": "1.0.0"
+    },
+    {
+      "name": "auto-post-need",
+      "displayName": "发布需求",
+      "description": "说清你要采购什么，整理成一条带规格、数量、交期、结算的需求，发布到联盟共享需求池，供方据此来对接你。没有密钥时给你一张可以直接粘贴的需求卡片。",
+      "path": "auto-post-need/",
+      "category": "sales",
+      "version": "1.0.0"
     }
   ]
 }
