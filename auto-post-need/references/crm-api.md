@@ -37,6 +37,7 @@
 | `priority` | **不要传** | 枚举 | 默认「中」；要改走 `update` 或让用户在控制台点 |
 | `creator` | **不要传** | 64 | 归属，服务端按 `X-API-Key` 反查 uid 自动写入；已有归属不被覆盖 |
 | `owner` | 不要传 | 128 | 负责人，采集场景的字段；发布需求用不上 |
+| `heat` | **不要传** | 整数 | **火力值** —— 这条需求在同行业里的曝光排位值，越大越靠前。由用户在控制台行尾徽标上**花钱投放**写入（出价式：成本 = 该行业当前最高火力值 + 10），本技能既不能也不该写。**新发布的需求初值 `10`**（行业冷启动价）；看到别人的需求排在你前面就是它比你高 |
 | `quality_score` / `report_url` / `report_time` | **不要写** | — | 由 GEO 评测自动任务回写 |
 
 - 多值字段一律半角 `;` 分隔。
@@ -48,8 +49,8 @@
 |---|---|---|
 | `save` | `company`（必填）+ `type: "need"` + 其余业务字段 | `action: created / merged / unchanged` + `id` + `company` + `creator` |
 | `saveMany` | `companies` 数组，**1–100 条/次** | `total` / `created` / `merged` / `unchanged` / `failed[]` |
-| `detail` | `company`（企业名精确匹配）或 `id` | 单条完整记录（含 `type` / `creator` / `status`）；查不到返 `errCode: -1` |
-| `search` | `mine: true` · `keyword` · `page` · `pageSize`（默认 20，上限 50） | `list` + `total` + `text`（文本行里 `need` 会显式标「需求」） |
+| `detail` | `company`（企业名精确匹配）或 `id` | 单条完整记录（含 `type` / `creator` / `status` / `heat`）；查不到返 `errCode: -1` |
+| `search` | `mine: true` · `keyword` · `orderBy`（`update_time` 默认 / `create_time` / `quality_score` / `company` / `heat`）· `order`（`asc` / `desc`，默认 `desc`）· `page` · `pageSize`（默认 20，上限 50） | `list` + `total` + `text`（文本行里 `need` 会显式标「需求」，有火力值时标「火力N」） |
 | `update` | `id`（必填）+ 待改字段 | `action: updated / unchanged` |
 | `delete` | `id`（必填） | `deleted` + `company` |
 | `stats` | 可选筛选 | `total` + 状态 / 优先级 / 行业分布 |
@@ -63,6 +64,8 @@
 - **归属测试**：判断一条记录是不是你的 —— `search {"mine": true, "keyword": "<企业名>"}` 能捞到就是你的。
 - `update` 语义是「非空即写」，传空字符串等于不改。**先核对 `creator` 是你自己再改。**
 - 云对象**不做归属校验**（update / delete 只认 `id`），靠调用方自律：不是你的记录不要动。
+- **`heat`（火力值）是「谁排前面」的唯一依据，且只有用户能改**：别人搜到你的需求、你和别人的需求谁靠前，看的就是它。SKILL 侧**写不进去**（服务端刻意不把这个字段放进可写白名单，否则 Agent 能绕开付费把一条需求顶到榜一）。用户想让自己那条更靠前，指引他去控制台点行尾的火力徽标投放 —— 那要扣他账号上的火力。
+- **`orderBy` 传了不在白名单里的值不报错**：服务端**静默回落**成 `update_time`。要看「需求榜」用 `orderBy: "heat"` + `order: "desc"`。
 
 ## 四、同名预检（N3 必做）
 

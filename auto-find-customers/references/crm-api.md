@@ -37,6 +37,7 @@
 | `source` | — | 256 | 来源·时间；模型知识标「模型知识·待验证」 |
 | `creator` | — | 64 | **归属联盟会员 uid。一般不要传** —— 服务端按 `X-API-Key` 自动写入；只在管理员代录、需要指定归属时才显式传。**已有归属不会被覆盖** |
 | `priority` | — | 枚举 | `高` / `中`（默认）/ `低`。`高` = 排入 GEO 评测队列。**改优先级走 `update`，不要在批量写入时顺手传** |
+| `heat` | — | 整数 | **火力值** —— 需求在同行业内争取曝光的排位值，语义 = 最近一次投放的出价，越大越靠前。**不要传** —— 这是本表**唯一不经 SKILL / MCP 写入的业务字段**（由客户控制台的「投放火力」写入，投放要扣投放人的账号火力）。**检索 / 详情会带出**：某条需求排在同行业前面就是它。历史行缺该字段按 `0` 处理 |
 | `quality_score` | — | 0–100 整数 | GEO 质量评分，由自动任务回写；人工可覆盖。**传 `0` 是合法分**（区别于「没传」） |
 | `report_url` | — | 512 | GEO 评测报告公开 URL，由自动任务回写；**非空即视为已出报告**，任务不会重复生成。**检索 / 详情的结果会带上该链接**，拿到就直接给用户看 |
 | `report_time` | — | 毫秒时间戳 | 报告生成时间。写 `report_url` 时若不传，服务端自动补当前时间 |
@@ -50,8 +51,8 @@
 |---|---|---|
 | `save` | `company`（必填）+ 其余字段 | `action: created / merged / unchanged` + `id` + `creator` + `priority` |
 | `saveMany` | `companies` 数组，**1–100 条/次** | `total` / `created` / `merged` / `unchanged` / `failed[]` |
-| `search` | `keyword`（名称/产品模糊）· `industry` · `status` · `priority` · `mine` · `creator` · `page` · `pageSize`（默认 20，上限 50） | `list` + `total` |
-| `detail` | `id` 或 `company`（`id` 优先） | 单条记录（含 `type` / `creator` / `priority` / `quality_score` / `report_url`） |
+| `search` | `keyword`（名称/产品模糊）· `industry` · `status` · `priority` · `mine` · `creator` · `orderBy`（`update_time` 默认 / `create_time` / `quality_score` / `company` / `heat`）· `order`（`asc` / `desc`，默认 `desc`）· `page` · `pageSize`（默认 20，上限 50） | `list` + `total` |
+| `detail` | `id` 或 `company`（`id` 优先） | 单条记录（含 `type` / `creator` / `priority` / `quality_score` / `report_url` / `heat`） |
 | `update` | `id`（必填）+ 待改字段（含 `priority` / `quality_score` / `report_url`） | `action: updated / unchanged` |
 | `delete` | `id`（必填） | `deleted` + `company` |
 | `stats` | `industry`（可选）· `creator`（可选）；均省略即全量 | `total` + 状态分布 + **优先级分布** + 行业分布 |
@@ -65,6 +66,8 @@
 - `update` 语义是「非空即写」，传空字符串等于不改；`quality_score` 例外——传 `0` 会照写。
 - 想只看某人的线索：`mine: true`（等价于 `creator` = 当前 Key 的 uid），或显式传 `creator: "<uid>"`。
 - **`type`（线索 / 需求）不参与筛选**：历史行没有该字段，服务端精确匹配会把它们**整批漏掉**。要区分类型请读返回记录的 `type` —— 缺字段即按 `lead` 处理。
+- **`heat`（火力值）只读**：它只由客户控制台的「投放火力」写入（出价式 —— 成本 = 该需求所属行业当前最高火力值 + 10），SKILL 侧既不用传、也写不进去。要出「需求榜」用 `orderBy: "heat"` + `order: "desc"`。
+- **`orderBy` 传了不在白名单里的值不报错**：服务端**静默回落**成 `update_time`，你会拿到一个「看起来正常但顺序不对」的结果。白名单就是上面 `search` 那一行的五项。
 
 ## 四、错误码与处置
 
